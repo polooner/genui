@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import { MultiUserSchema, UserSchema } from './schemas';
 
 const oai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY ?? 'undefined',
+  apiKey: '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',
 });
 
 const client = Instructor({

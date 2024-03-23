@@ -9,7 +9,7 @@ import { UserSchema } from './lib/schemas';
 // });
 const oai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_FILIP_ANTHROPIC_API_KEY,
-  organization: process.env.OPENAI_ORG_ID ?? undefined,
+  //   organization: process.env.OPENAI_ORG_ID ?? undefined,
   baseURL: 'https://api.anthropic.com/v1/messages',
 });
 

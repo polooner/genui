@@ -1,42 +1,49 @@
-import axios from 'axios';
 import * as fs from 'fs';
+import fetch from 'node-fetch';
 
-// Replace these values with your actual API key and search engine ID
-const API_KEY: string = 'AIzaSyABGbTCFJzPqHMgkRazaWHVpd5OpNbhqmw';
-const CX: string = 'a75b13ac744f14267';
-const query: string = 'Coffee';
+// Define your Zenserp API key
+const apiKey = '46269a40-e931-11ee-8c8e-958f352332f8';
 
-// API endpoint
-const url: string = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CX}&searchType=image&q=${query}`;
+// Define the image query
+const imageQuery = 'Coffee';
 
-// Send GET request
-axios
-  .get(url)
-  .then((response) => {
-    // Check if request was successful
-    if (response.status === 200) {
-      // Parse JSON response
-      const data = response.data;
+// Set up the API endpoint
+const url = `https://app.zenserp.com/api/v2/search?q=${imageQuery}&tbm=isch&num=5`;
 
-      // Extract image URLs
-      const imageUrls: string[] = data.items
-        .slice(0, 5)
-        .map((item: any) => item.link);
+// Set up headers with your API key
+const headers = {
+  apikey: apiKey,
+};
 
-      // Download images
-      imageUrls.forEach(async (url: string, i: number) => {
-        const imgResponse = await axios.get(url, {
-          responseType: 'arraybuffer',
-        });
-        fs.writeFileSync(
-          `image_${i + 1}.jpg`,
-          Buffer.from(imgResponse.data, 'binary')
-        );
-      });
-    } else {
-      console.log('Error:', response.status);
-    }
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-  });
+// Function to fetch and process images
+async function fetchAndProcessImages() {
+  try {
+    const response = await fetch(url, { headers });
+    const data = await response.json();
+    const imageResults = data.image_results;
+
+    // Extract top 3 image URLs
+    const top3ImageUrls = imageResults
+      .slice(0, 3)
+      .map((result: any) => result.sourceUrl);
+
+    // Package URLs into JSON format
+    const jsonOutput = JSON.stringify({ top3ImageUrls });
+
+    // Write JSON output to a file
+    fs.writeFileSync('top3_image_urls.json', jsonOutput);
+
+    console.log('Top 3 image URLs packaged into top3_image_urls.json');
+
+    return jsonOutput; // Return JSON output
+  } catch (error) {
+    console.error('Error fetching and processing images:', error);
+    return null;
+  }
+}
+
+// Call the function and handle the returned JSON output
+fetchAndProcessImages().then((jsonOutput) => {
+  // Send out the JSON output here or perform further actions
+  console.log('JSON output:', jsonOutput);
+});
