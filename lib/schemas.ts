@@ -41,7 +41,19 @@ const FocusSchema = z.object({
   activeBlock: z.number().int()
 })
 
-// State
+// OpenAI Messages (for AI use only)
+enum OpenAIMessageRoleType {
+  user = "user",
+  assistant = "assistant",
+  tool = "tool"
+}
+const OpenAIMessage = z.object({
+  role: z.nativeEnum(OpenAIMessageRoleType),
+  content: z.string(),
+  tool_call_id: z.string().optional()
+})
+
+// State Messages (for frontend use)
 const Message = z.object({
   role: z.enum(['human', 'AI']),
   content: z.union([
@@ -50,16 +62,16 @@ const Message = z.object({
   type: z.nativeEnum(MultiComponentTypes)
 })
 
-const Messages = z.object({
-  messages: z.array(Message)
-  })
 
+// State
 const StateSchema = z.object({
-  messages: Messages,
+  messages: z.array(Message),
+  openAIMessages: z.array(OpenAIMessage)
 })
 
 type Message = z.infer<typeof Message>;
-type Messages = z.infer<typeof Messages>;
+type Messages = z.infer<typeof Message>[];
+type OpenAIMessages = z.infer<typeof OpenAIMessage>[];
 type StateSchema = z.infer<typeof StateSchema>;
 
-export { Message, Messages, StateSchema }
+export { Message, Messages, OpenAIMessageRoleType, OpenAIMessages, StateSchema, MultiComponentTypes }
