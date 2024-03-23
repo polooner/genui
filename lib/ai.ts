@@ -1,6 +1,7 @@
 import Instructor from '@instructor-ai/instructor';
 import OpenAI from 'openai';
-import { SchemaType, ImageBlock, MultiImageBlockRequest, UISelection } from './ai_schemas';
+import { SchemaType, SmallBlock, MediumBlock, UISelection } from './ai_schemas';
+import { Messages } from './schemas';
 
 const GPT4 = 'gpt-4-0125-preview'
 const GPT3dot5 = 'gpt-3.5-turbo-0125'
@@ -14,7 +15,7 @@ const client = Instructor({
   mode: 'FUNCTIONS',
 });
 
-async function createObjectGenerator(messages: [{ role: string, content: string }]): Promise<any> {
+async function createObjectGenerator(messages: Messages): Promise<any> {
   return await client.chat.completions.create({
     messages: messages,
     model: GPT4,
@@ -28,7 +29,7 @@ async function createObjectGenerator(messages: [{ role: string, content: string 
   });
 }
 
-async function makeUISelection(messages): Promise<any> {
+async function makeUISelection(messages: Messages): Promise<any> {
   return await client.chat.completions.create({
     messages: messages,
     model: GPT4,
@@ -41,12 +42,12 @@ async function makeUISelection(messages): Promise<any> {
   });
 }
 
-async function createSchemaAndGenerators(messages) {
+async function createSchemaAndGenerators(messages: Messages) {
   const uiSelection = await makeUISelection(messages);
   const generators: Promise<any>[] = [];
   if ('blocks' in uiSelection.element) {
     for (const block of uiSelection.element.blocks) {
-      const generator = createObjectGenerator([{ role: 'system', content: block.shortDescription }]);
+      const generator = createObjectGenerator(messages);
       generators.push(generator);
     }
   }

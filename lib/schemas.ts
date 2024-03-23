@@ -2,6 +2,11 @@ import { z } from "zod";
 
 
 // Component Blocks
+enum BlockTypes {
+  small = "small",
+  medium = "medium"
+}
+
 const SmallBlockSchema = z.object({
   imgUrl: z.string().url(),
   title: z.string(),
@@ -36,14 +41,25 @@ const FocusSchema = z.object({
   activeBlock: z.number().int()
 })
 
-const StateSchema = z.object({
-  messages: z.array(
-    z.object({
-      role: z.enum(['human', 'AI']),
-      content: z.union([
-        z.string(), CompactSchema, CarousalSchema, FocusSchema
-      ]),
-      type: z.nativeEnum(MultiComponentTypes)
-    })
-  )
+// State
+const Message = z.object({
+  role: z.enum(['human', 'AI']),
+  content: z.union([
+    z.string(), CompactSchema, CarousalSchema, FocusSchema
+  ]),
+  type: z.nativeEnum(MultiComponentTypes)
 })
+
+const Messages = z.object({
+  messages: z.array(Message)
+  })
+
+const StateSchema = z.object({
+  messages: Messages,
+})
+
+type Message = z.infer<typeof Message>;
+type Messages = z.infer<typeof Messages>;
+type StateSchema = z.infer<typeof StateSchema>;
+
+export { Message, Messages, StateSchema }
