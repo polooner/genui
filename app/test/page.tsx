@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 
+import SmallBlock from "@/components/small-block";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -9,10 +10,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Focus from "@/components/focus";
 
 export default function CarouselSpacing() {
   return (
-    <div className="flex items-center justify-center h-screen mx-auto">
+    <div className="flex flex-col items-center justify-center">
       <Carousel className="w-full max-w-sm">
         <CarouselContent className="-ml-1">
           {Array.from({ length: 5 }).map((_, index) => (
@@ -45,7 +47,10 @@ export default function CarouselSpacing() {
         <CarouselNext />
       </Carousel>
 
-      
+      <SmallBlock />
+      <div className="mb-20"></div>
+      <Focus />
+      <div className="mb-20"></div>
     </div>
   );
 }
