@@ -14,30 +14,18 @@ import {
   FocusSchema,
   StateSchema,
 } from '@/lib/schemas';
-import { useChat } from 'ai/react';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { z } from 'zod';
 
 export default function IndexPage() {
-  // const [messages, setMessages] = useState<z.infer<typeof StateSchema>>(
-  //   {} as z.infer<typeof StateSchema>
-  // );
-  // const [input, setInput] = useState('');
-  // const [isLoading, setLoading] = useState(false);
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    setInput,
-    isLoading,
-  } = useChat({
-    api: '/api/completion',
-    initialMessages: [{ role: 'Human', content: 'lol', id: '1' }],
-  });
+  const [messages, setMessages] = useState<z.infer<typeof StateSchema>>(
+    {} as z.infer<typeof StateSchema>
+  );
+  const [input, setInput] = useState('');
+  const [isLoading, setLoading] = useState(false);
 
   const typedMessages = messages as StateSchema;
 
@@ -172,7 +160,7 @@ export default function IndexPage() {
                 name='message'
                 rows={1}
                 value={input}
-                onChange={handleInputChange}
+                onChange={(e) => setInput(e.currentTarget.value)}
               />
               <Tooltip>
                 <TooltipTrigger asChild>
