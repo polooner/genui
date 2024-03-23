@@ -1,6 +1,6 @@
 import Instructor from '@instructor-ai/instructor';
 import OpenAI from 'openai';
-import { ImageBlock, MultiImageBlockRequest, UISelection } from './schemas';
+import { SchemaType, ImageBlock, MultiImageBlockRequest, UISelection } from './ai_schemas';
 
 const GPT4 = 'gpt-4-0125-preview'
 const GPT3dot5 = 'gpt-3.5-turbo-0125'
@@ -14,34 +14,51 @@ const client = Instructor({
   mode: 'FUNCTIONS',
 });
 
+async function createObjectGenerator(messages: [{ role: string, content: string }]): Promise<any> {
+  return await client.chat.completions.create({
+    messages: messages,
+    model: GPT4,
+    response_model: {
+      schema: UISelection,
+      name: 'value extraction',
+    },
+    stream: true,
+    seed: 1,
+    max_retries: 3,
+  });
+}
+
+async function makeUISelection(messages): Promise<any> {
+  return await client.chat.completions.create({
+    messages: messages,
+    model: GPT4,
+    response_model: {
+      schema: UISelection,
+      name: 'value extraction',
+    },
+    seed: 1,
+    max_retries: 3,
+  });
+}
+
+async function createSchemaAndGenerators(messages) {
+  const uiSelection = await makeUISelection(messages);
+  const generators: Promise<any>[] = [];
+  if ('blocks' in uiSelection.element) {
+    for (const block of uiSelection.element.blocks) {
+      const generator = createObjectGenerator([{ role: 'system', content: block.shortDescription }]);
+      generators.push(generator);
+    }
+  }
+return { uiElement: uiSelection.element, generators };
+
+}
+
+function sendMessage() {
+  schema, blockGenerators = createSchemaAndGenerators();
+}
+
+
 const prompt1 = "Hey there, I'm curious to learn more about the wines of italy. Can you teach me the different types?"
 const prompt2 = "What are top 5 largest US companies by revenue?"
 
-const extractionStream = await client.chat.completions.create({
-  messages: [{ role: 'user', content: prompt1 }],
-  model: GPT4,
-  response_model: {
-    schema: UISelection,
-    name: 'value extraction',
-  },
-  stream: true,
-  seed: 1,
-  max_retries: 3,
-});
-
-let mostRecentResult: any;
-for await (const result of extractionStream) {
-  try {
-    console.clear();
-    // Convert the object to a string with indentation for readability
-    console.log(result);
-    mostRecentResult = result;
-  } catch (e) {
-    console.log(e);
-    break;
-  }
-}
-
-console.clear();
-console.log("Most recent result")
-console.log(JSON.stringify(mostRecentResult, null, 2));

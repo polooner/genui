@@ -1,6 +1,6 @@
 import { AnthropicChatApi, } from 'llm-api';
 import { completion, } from 'zod-gpt';
-import { UserSchema } from './lib/schemas';
+import { UserSchema } from './lib/ai_schemas';
 
 const client = new AnthropicChatApi(
   {
