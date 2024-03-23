@@ -1,6 +1,6 @@
 import Instructor from '@instructor-ai/instructor';
 import OpenAI from 'openai';
-import { UserSchema } from './lib/schemas';
+import { UserSchema } from './lib/ai_schemas';
 
 // const oai = new OpenAI({
 //   apiKey: process.env.NEXT_PUBLIC_FILIP_ANTHROPIC_API_KEY,
