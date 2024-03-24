@@ -77,7 +77,7 @@ export default function IndexPage() {
       ...prevState,
       openAIMessages: [
         ...prevState.openAIMessages,
-        { role: OpenAIMessageRoleType.tool, tool_call_id: 'UISelection', content: content },
+        { role: OpenAIMessageRoleType.function, name: 'UISelection', content: content },
       ],
       messages: [
         ...prevState.messages,

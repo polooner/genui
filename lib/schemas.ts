@@ -66,13 +66,13 @@ enum OpenAIMessageRoleType {
   user = 'user',
   assistant = 'assistant',
   system = 'system',
-  tool = 'tool'
+  function = 'function'
 }
 
 const OpenAIMessage = z.object({
   role: z.nativeEnum(OpenAIMessageRoleType),
   content: z.string(),
-  tool_call_id: z.string().optional(),
+  name: z.string().optional(),
 });
 
 // State Messages (for frontend use)

@@ -79,7 +79,7 @@ export async function createGenerators(uiSelection: UISelection, messages: OpenA
 const prompt1 = "Hey there, I'm curious to learn more about the wines of italy. Can you teach me the different types?"
 const prompt2 = "What are top 5 largest US companies by revenue?"
 
-const messages = [{role: 'user', content: prompt2}]
+// const messages = [{role: 'user', content: prompt2}]
 // const generators = await createGenerators(messages);
 // console.log(generators);
 // generators.forEach(generator => {
