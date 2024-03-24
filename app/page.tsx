@@ -70,49 +70,37 @@ export default function IndexPage() {
     }
   };
 
-  const updateMessagesFromUser = (newMessage: any) => {
-    console.log('State Before updateMessagesFromUser', JSON.stringify(state, null, 2));
-    setState((prevState: StateSchemaType) => ({
-      ...prevState,
-      messages: [
-        ...prevState.messages,
-        {
-          role: MessageRoleType.human,
-          content: { blocks: [{ text: newMessage }] },
-          type: MultiComponentTypes.text,
-        },
-      ],
-      openAIMessages: [
-        ...prevState.openAIMessages,
-        {
-          role: OpenAIMessageRoleType.user,
-          content: newMessage,
-        },
-      ],
-    }));
+  const updateMessagesFromUser = (newState: any, userInput: string) => {
+    console.log('newState Before updateMessagesFromUser', JSON.stringify(newState, null, 2));
+    newState.messages.push({
+      role: MessageRoleType.human,
+      content: { blocks: [{ text: input }] },
+      type: MultiComponentTypes.text,
+    });
+    newState.openAIMessages.push({
+      role: OpenAIMessageRoleType.user,
+      content: input,
+    });
+    console.log('newState After updateMessagesFromUser (outside of function)', JSON.stringify(newState, null, 2));
+    setState(newState);
+    return newState;
   };
 
-  const updateStateFromCompact = (content: any) => {
-    console.log('State Before updateStateFromCompact', JSON.stringify(state, null, 2));
-    setState((prevState: StateSchemaType) => ({
-      ...prevState,
-      openAIMessages: [
-        ...prevState.openAIMessages,
-        {
-          role: OpenAIMessageRoleType.function,
-          name: 'UISelection',
-          content: content,
-        },
-      ],
-      messages: [
-        ...prevState.messages,
-        {
-          role: MessageRoleType.ai,
-          content: content,
-          type: MultiComponentTypes.compact,
-        },
-      ],
-    }));
+  const updateStateFromCompact = (newState: any, content: any) => {
+    console.log('newState Before updateStateFromCompact', JSON.stringify(newState, null, 2));
+    newState.openAIMessages.push({
+      role: OpenAIMessageRoleType.function,
+      name: 'UISelection',
+      content: content,
+    });
+    newState.messages.push({
+      role: MessageRoleType.ai,
+      content: content,
+      type: MultiComponentTypes.compact,
+    });
+    console.log('newState After updateStateFromCompact', JSON.stringify(newState, null, 2));
+    setState(newState);
+    return newState;
   };
 
   const startGeneratorTimer = (generators: ActiveGeneratorsType) => {
@@ -126,28 +114,31 @@ export default function IndexPage() {
           ...prevState.activeGenerators,
           generators: generators.generators,
         };
-        const updatedState = updateState(updatedGenerators, state); // Assuming updateState is a function that updates the state with new activeGenerators
+        const updatedState = updateState(updatedGenerators, state);
         return updatedState;
       });
     }, 100);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent default form submission behavior
+
+    // Step 1: Copy the State
+    let newState = JSON.parse(JSON.stringify(state)); // Simple deep copy, consider more robust methods for complex states
+
     try {
-      updateMessagesFromUser(input);
-      console.log('State After updateMessagesFromUser (outside of function)', JSON.stringify(state, null, 2));
+      newState = updateMessagesFromUser(newState, input);
 
       console.log("Making UI Selection")
-      const uiSelection = await makeUISelection(state.openAIMessages);
-      console.log('UI Selection:', uiSelection);
+      const uiSelection = await makeUISelection(newState.openAIMessages);
+      console.log('UI Selection:', JSON.stringify(uiSelection, null, 2));
 
       if (uiSelection.element === MultiComponentTypes.compact) {
-        console.log('Updating State from Compact');
-        updateStateFromCompact(uiSelection.content);
+        newState = updateStateFromCompact(newState, uiSelection.content);
       } else {
         const generators = await createGenerators(
           uiSelection,
-          state.openAIMessages
+          newState.openAIMessages
         );
         startGeneratorTimer(generators);
       }

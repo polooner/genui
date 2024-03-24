@@ -21,7 +21,7 @@ async function createObjectGenerator(messages: OpenAIMessagesType): Promise<any>
   const messagesCopy = messages;
   return await client.chat.completions.create({
     messages: messagesCopy,
-    model: GPT3dot5,
+    model: GPT4,
     response_model: {
       schema: MediumBlockQuery,
       name: 'value extraction',
