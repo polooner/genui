@@ -26,8 +26,12 @@ import {
   MessageRoleType,
   MultiComponentTypes,
   OpenAIMessageRoleType,
+  SmallBlockSchema,
+  SmallBlockSchemaType
 } from '@/lib/schemas';
 import { updateState } from '@/lib/stream_handler';
+import { UISelectionType } from '@/lib/ai_schemas';
+import { fetchTopImageUrl } from '@/lib/utils/query_image';
 
 export default function IndexPage() {
   const [state, setState] = useState<z.infer<typeof StateSchema>>({
@@ -86,8 +90,24 @@ export default function IndexPage() {
     return newState;
   };
 
-  const updateStateFromCompact = (newState: any, content: any) => {
+  const updateStateFromCompact = async (newState: any, uiSelection: UISelectionType) => {
     console.log('newState Before updateStateFromCompact', JSON.stringify(newState, null, 2));
+
+    // convert CompactQuery (an AI Schema) into CompactSchema (the UI Schema)
+    const compactBlocks: SmallBlockSchemaType[] = await Promise.all(
+      uiSelection.content.blocks.map(async (block) => {
+        const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
+        return {
+          imgUrl: imgUrl,
+          title: block.title,
+          subtitle: block.subtitle,
+          data: block.data,
+        };
+      })
+    );
+
+    const content = CompactSchema.parse({ blocks: compactBlocks });
+
     newState.openAIMessages.push({
       role: OpenAIMessageRoleType.function,
       name: 'UISelection',
@@ -134,7 +154,8 @@ export default function IndexPage() {
       console.log('UI Selection:', JSON.stringify(uiSelection, null, 2));
 
       if (uiSelection.element === MultiComponentTypes.compact) {
-        newState = updateStateFromCompact(newState, uiSelection.content);
+
+        newState = updateStateFromCompact(newState, uiSelection);
       } else {
         const generators = await createGenerators(
           uiSelection,
@@ -185,7 +206,7 @@ export default function IndexPage() {
                 <div className='flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0'>
                   {compactContent.blocks.map((block, blockIndex) => (
                     <div key={blockIndex}>
-                      <Image src={block.imgUrl} alt={block.title} />
+                      {block.imgUrl && <Image src={block.imgUrl} alt={block.title} />}
                       <h3>{block.title}</h3>
                       {block.subtitle && <p>{block.subtitle}</p>}
                       {block.data && <p>{block.data}</p>}

@@ -7,7 +7,7 @@ enum BlockTypes {
 }
 
 export const SmallBlockSchema = z.object({
-  imgUrl: z.string().url(),
+  imgUrl: z.string().url().optional(),
   title: z.string(),
   subtitle: z.string().optional(),
   data: z.string().optional(),

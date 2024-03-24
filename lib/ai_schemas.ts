@@ -27,7 +27,7 @@ export const MediumBlockQuery = z.object({
 export type MediumBlockQueryType = z.infer<typeof MediumBlockQuery>;
 
 // Block Lists
-export const Compact = z.object({
+export const CompactQuery = z.object({
   blocks: z.array(SmallBlockResponse)
 })
 .describe(
@@ -44,7 +44,7 @@ export const Compact = z.object({
   "Q) What are the largest companies by employee count?"
   )
 
-export const Carousel = z.object({
+export const CarouselQuery = z.object({
   blocks: z.array(MediumBlockQuery)
 })
 .describe(
@@ -64,7 +64,7 @@ export const Carousel = z.object({
   "Q) Can you outline a 3-day tour plan for Rome?"
   )
 
-export const Focus = z.object({
+export const FocusQuery = z.object({
     blocks: z.array(MediumBlockQuery),
 })
 .describe(
@@ -89,7 +89,7 @@ export const Focus = z.object({
 export const UISelection = z.object({
   chainOfThought: z.string().describe("Think step by step about which UI element would be best for the user's request."),
   element: z.nativeEnum(MultiComponentTypes),
-  content: z.union([Compact, Carousel, Focus])
+  content: z.union([CompactQuery, CarouselQuery, FocusQuery])
 })
 .describe(
   'Your task is to select is to select the appropriate UI element for answering the user question. Rather than simply ' +
