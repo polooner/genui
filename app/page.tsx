@@ -20,14 +20,24 @@ import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react';
 import { z } from 'zod';
 
-import { makeUISelection, createGenerators } from '@/lib/ai';
-import { MultiComponentTypes, MessageRoleType, OpenAIMessageRoleType } from '@/lib/schemas';
+import { createGenerators, makeUISelection } from '@/lib/ai';
+import {
+  MessageRoleType,
+  MultiComponentTypes,
+  OpenAIMessageRoleType,
+} from '@/lib/schemas';
 import { updateState } from '@/lib/stream_handler';
 
 export default function IndexPage() {
-  const [state, setState] = useState<z.infer<typeof StateSchema>>(
-    {} as z.infer<typeof StateSchema>
-  );
+  const [state, setState] = useState<z.infer<typeof StateSchema>>({
+    messages: [
+      {
+        content: { blocks: [{ text: 'random thing' }] },
+        role: 'human',
+        type: 'compact',
+      },
+    ],
+  } as z.infer<typeof StateSchema>);
   const [input, setInput] = useState('');
   const [isLoading, setLoading] = useState(false);
 
@@ -77,7 +87,11 @@ export default function IndexPage() {
       ...prevState,
       openAIMessages: [
         ...prevState.openAIMessages,
-        { role: OpenAIMessageRoleType.tool, tool_call_id: 'UISelection', content: content },
+        {
+          role: OpenAIMessageRoleType.tool,
+          tool_call_id: 'UISelection',
+          content: content,
+        },
       ],
       messages: [
         ...prevState.messages,
@@ -97,7 +111,10 @@ export default function IndexPage() {
           clearInterval(intervalId);
           return prevState;
         }
-        const updatedGenerators = { ...prevState.activeGenerators, generators: generators.generators };
+        const updatedGenerators = {
+          ...prevState.activeGenerators,
+          generators: generators.generators,
+        };
         const updatedState = updateState(updatedGenerators, state); // Assuming updateState is a function that updates the state with new activeGenerators
         return updatedState;
       });
@@ -113,12 +130,14 @@ export default function IndexPage() {
       if (uiSelection.element === MultiComponentTypes.compact) {
         updateStateFromCompact(uiSelection.content);
       } else {
-        const generators = await createGenerators(uiSelection, state.openAIMessages);
+        const generators = await createGenerators(
+          uiSelection,
+          state.openAIMessages
+        );
         startGeneratorTimer(generators);
       }
-     
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
+      console.error('Error in handleSubmit:', error);
     } finally {
       setLoading(false);
     }
@@ -126,7 +145,7 @@ export default function IndexPage() {
 
   return (
     <main className='flex flex-col w-full items-center justify-between pb-40 pt-10'>
-      {state.map((message, index) => {
+      {state?.messages.map((message, index) => {
         if (message.role === 'human') {
           return (
             <div
@@ -139,7 +158,8 @@ export default function IndexPage() {
                 user
               </span>
               <div className='flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0'>
-                <div>{message.content as string}</div>
+                {/* @ts-expect-error  */}
+                <div>{message.content.blocks[0].text as string}</div>
               </div>
             </div>
           );
