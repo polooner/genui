@@ -1,43 +1,44 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { IconArrowElbow } from '@/components/ui/icons';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from "@/components/ui/button";
+import { IconArrowElbow } from "@/components/ui/icons";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
 import {
   CarouselSchema,
   CompactSchema,
   FocusSchema,
   StateSchema,
-} from '@/lib/schemas';
-import clsx from 'clsx';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import React, { useRef, useState } from 'react';
-import { z } from 'zod';
+} from "@/lib/schemas";
+import clsx from "clsx";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import React, { useRef, useState } from "react";
+import { z } from "zod";
 
-import SmallBlock from '@/components/small-block';
-import { createGenerators, makeUISelection } from '@/lib/ai';
-import { UISelectionType } from '@/lib/ai_schemas';
+import SmallBlock from "@/components/small-block";
+import { createGenerators, makeUISelection } from "@/lib/ai";
+import { UISelectionType } from "@/lib/ai_schemas";
 import {
   ActiveGeneratorsType,
   MessageRoleType,
   MultiComponentTypes,
   OpenAIMessageRoleType,
   SmallBlockSchemaType,
-} from '@/lib/schemas';
-import { updateState } from '@/lib/stream_handler';
-import { fetchTopImageUrl } from '@/lib/utils/query_image';
+} from "@/lib/schemas";
+import { updateState } from "@/lib/stream_handler";
+import { fetchTopImageUrl } from "@/lib/utils/query_image";
+import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 
 export default function IndexPage() {
   const [state, setState] = useState<z.infer<typeof StateSchema>>({
     messages: [
       {
-        content: { blocks: [{ text: 'initial' }] },
+        content: { blocks: [{ text: "initial" }] },
         role: MessageRoleType.human,
         type: MultiComponentTypes.text,
       },
@@ -45,7 +46,7 @@ export default function IndexPage() {
     openAIMessages: [
       {
         role: OpenAIMessageRoleType.user,
-        content: 'initial',
+        content: "initial",
       },
     ],
     activeGenerators: {
@@ -53,7 +54,7 @@ export default function IndexPage() {
       currentComponentType: MultiComponentTypes.compact,
     },
   } as z.infer<typeof StateSchema>);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setLoading] = useState(false);
 
   const typedMessages = state as StateSchema;
@@ -65,7 +66,7 @@ export default function IndexPage() {
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
   const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (
-      event.key === 'Enter' &&
+      event.key === "Enter" &&
       !event.shiftKey &&
       !event.nativeEvent.isComposing
     ) {
@@ -76,7 +77,7 @@ export default function IndexPage() {
 
   const updateMessagesFromUser = (newState: any, userInput: string) => {
     console.log(
-      'newState Before updateMessagesFromUser',
+      "newState Before updateMessagesFromUser",
       JSON.stringify(newState, null, 2)
     );
     newState.messages.push({
@@ -89,7 +90,7 @@ export default function IndexPage() {
       content: input,
     });
     console.log(
-      'newState After updateMessagesFromUser (outside of function)',
+      "newState After updateMessagesFromUser (outside of function)",
       JSON.stringify(newState, null, 2)
     );
     setState(newState);
@@ -101,7 +102,7 @@ export default function IndexPage() {
     uiSelection: UISelectionType
   ) => {
     console.log(
-      'newState Before updateStateFromCompact',
+      "newState Before updateStateFromCompact",
       JSON.stringify(newState, null, 2)
     );
     // Create TempState before ImageLoading (and convert AI schema into UI schema)
@@ -124,7 +125,7 @@ export default function IndexPage() {
     });
     setState(tempStateWithoutImages);
     console.log(
-      'tempStateWithoutImages',
+      "tempStateWithoutImages",
       JSON.stringify(tempStateWithoutImages, null, 2)
     );
 
@@ -145,7 +146,7 @@ export default function IndexPage() {
 
     newState.openAIMessages.push({
       role: OpenAIMessageRoleType.function,
-      name: 'UISelection',
+      name: "UISelection",
       content: content,
     });
     newState.messages.push({
@@ -154,7 +155,7 @@ export default function IndexPage() {
       type: MultiComponentTypes.compact,
     });
     console.log(
-      'newState After updateStateFromCompact',
+      "newState After updateStateFromCompact",
       JSON.stringify(newState, null, 2)
     );
     setState(newState);
@@ -187,9 +188,9 @@ export default function IndexPage() {
     try {
       newState = updateMessagesFromUser(newState, input);
 
-      console.log('Making UI Selection');
+      console.log("Making UI Selection");
       const uiSelection = await makeUISelection(newState.openAIMessages);
-      console.log('UI Selection:', JSON.stringify(uiSelection, null, 2));
+      console.log("UI Selection:", JSON.stringify(uiSelection, null, 2));
 
       if (uiSelection.element === MultiComponentTypes.compact) {
         newState = updateStateFromCompact(newState, uiSelection);
@@ -201,30 +202,30 @@ export default function IndexPage() {
         startGeneratorTimer(generators);
       }
     } catch (error) {
-      console.error('Error in handleSubmit:', error);
+      console.error("Error in handleSubmit:", error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className='flex flex-col w-full items-center justify-between space-y-4 pb-40 pt-10'>
+    <main className=" flex flex-col w-full items-center justify-between space-y-4 pb-40 pt-10">
       {state?.messages.map((message, index) => {
         if (
           message.role === MessageRoleType.human &&
-          message.content.blocks[0].text != 'initial'
+          message.content.blocks[0].text != "initial"
         ) {
           return (
             <div
               key={index}
               className={clsx(
-                'flex p-4 shrink-0 w-[70%] max-w-[70%] space-x-4 select-none items-center justify-center rounded-md border shadow '
+                "flex p-4 shrink-0 w-[70%] max-w-[70%] space-x-4 select-none items-center justify-center rounded-md border shadow "
               )}
             >
-              <span className='ring-1 ring-accent rounded-md p-2 items-center text-center'>
+              <span className="ring-1 ring-accent rounded-md p-2 items-center text-center">
                 user
               </span>
-              <div className='flex w-full max-w-screen-md items-start space-x-4'>
+              <div className="flex w-full max-w-screen-md items-start space-x-4">
                 <div>{message.content.blocks[0].text as string}</div>
               </div>
             </div>
@@ -238,7 +239,7 @@ export default function IndexPage() {
               <div
                 key={index}
                 className={clsx(
-                  'flex w-[70%] max-w-[70%] flex-col items-center justify-center border-b space-y-4 px-5 border-accent py-6 '
+                  "flex w-[70%] max-w-[70%] flex-col items-center justify-center border-b space-y-4 px-5 border-accent py-6 "
                 )}
               >
                 {compactContent.blocks.map((block, blockIndex) => (
@@ -260,16 +261,16 @@ export default function IndexPage() {
               <div
                 key={index}
                 className={clsx(
-                  'flex w-[70%] max-w-[70%] items-center justify-center border-b border-gray-200 py-6 '
+                  "flex w-[70%] max-w-[70%] items-center justify-center border-b border-gray-200 py-6 "
                 )}
               >
-                <div className='flex w-full max-w-screen-md items-start space-x-4'>
+                <div className="flex w-full max-w-screen-md items-start space-x-4">
                   <div
-                    className={clsx('p-1.5 text-white', 'bg-green-500')}
+                    className={clsx("p-1.5 text-white", "bg-green-500")}
                   ></div>
 
                   {carouselContent.blocks.map((block, blockIndex) => (
-                    <div key={blockIndex} className='space-y-2'>
+                    <div key={blockIndex} className="space-y-2">
                       {block.imgUrl && (
                         <Image
                           src={block.imgUrl}
@@ -278,7 +279,7 @@ export default function IndexPage() {
                           height={100}
                         />
                       )}
-                      <h3 className='text-lg font-semibold'>{block.title}</h3>
+                      <h3 className="text-lg font-semibold">{block.title}</h3>
                       {block.text && <p>{block.text}</p>}
                     </div>
                   ))}
@@ -292,10 +293,10 @@ export default function IndexPage() {
               <div
                 key={index}
                 className={clsx(
-                  'flex w-[70%] max-w-[70%] items-center justify-center border-b border-gray-200 py-6 '
+                  "flex w-[70%] max-w-[70%] items-center justify-center border-b border-gray-200 py-6 "
                 )}
               >
-                <div className='flex w-full max-w-screen-md items-start space-x-4'>
+                <div className="flex w-full max-w-screen-md items-start space-x-4">
                   {activeBlock.imgUrl && (
                     <Image
                       src={activeBlock.imgUrl}
@@ -304,8 +305,8 @@ export default function IndexPage() {
                       height={100}
                     />
                   )}
-                  <div className='space-y-2'>
-                    <h3 className='text-lg font-semibold'>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">
                       {activeBlock.title}
                     </h3>
                     {activeBlock.text && <p>{activeBlock.text}</p>}
@@ -318,25 +319,25 @@ export default function IndexPage() {
         return null;
       })}
 
-      <div className='fixed bottom-0 flex w-[80%] items-center space-y-3 p-5 pb-3 sm:px-0'>
+      <div className="fixed bottom-0 flex w-[80%] items-center space-y-3 p-5 pb-3 sm:px-0">
         <form
-          className='w-full flex flex-row items-center p-10'
+          className="w-full flex flex-row items-center p-10"
           ref={formRef}
           onSubmit={handleSubmit}
         >
-          <div className='flex-1 space-y-4 border-t bg-black  px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4'>
-            <div className='flex items-center space-x-2'>
+          <div className="flex-1 space-y-4 border-t bg-black  px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
+            <div className="flex items-center space-x-2">
               <Textarea
                 ref={inputRef}
                 tabIndex={0}
                 onKeyDown={onKeyDown}
-                placeholder='Send a message.'
-                className='min-h-[60px] flex-1 resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm'
+                placeholder="Send a message."
+                className="min-h-[60px] flex-1 resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
                 autoFocus
                 spellCheck={false}
-                autoComplete='off'
-                autoCorrect='off'
-                name='message'
+                autoComplete="off"
+                autoCorrect="off"
+                name="message"
                 rows={1}
                 value={input}
                 onChange={(e) => setInput(e.currentTarget.value)}
@@ -344,14 +345,14 @@ export default function IndexPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className='min-h-[60px] border-input px-4 min-w-16 '
-                    type='submit'
-                    size='icon'
-                    variant={'outline'}
-                    disabled={input === ''}
+                    className="min-h-[60px] border-input px-4 min-w-16 "
+                    type="submit"
+                    size="icon"
+                    variant={"outline"}
+                    disabled={input === ""}
                   >
                     <IconArrowElbow />
-                    <span className='sr-only'>Send message</span>
+                    <span className="sr-only">Send message</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Send message</TooltipContent>
