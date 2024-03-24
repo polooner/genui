@@ -77,7 +77,7 @@ export async function createGenerators(
   uiSelection.content.blocks.forEach(async (block, index) => {
     const blockInstructionMessages = createBlockInstructionMessages(messagesCopy, block);
     const generator = await createObjectGenerator(blockInstructionMessages);
-    const imgURL = await fetchTopImageUrl(block);
+    const imgURL = await fetchTopImageUrl(block.imageSearchQuery);
     const newGeneratorJob = { generator, blockIdx: index, imgURL };
     activeGenerators.generators.push(newGeneratorJob);
   });

@@ -92,8 +92,29 @@ export default function IndexPage() {
 
   const updateStateFromCompact = async (newState: any, uiSelection: UISelectionType) => {
     console.log('newState Before updateStateFromCompact', JSON.stringify(newState, null, 2));
+    // Create TempState before ImageLoading (and convert AI schema into UI schema)
+    const tempStateWithoutImages = {...newState};
+    const tempCompactBlocks: SmallBlockSchemaType[] = await Promise.all(
+      uiSelection.content.blocks.map(async (block) => {
+        return {
+          imgUrl: undefined,
+          title: block.title,
+          subtitle: block.subtitle,
+          data: block.data,
+        };
+      })
+    );
+    const tempContent = CompactSchema.parse({ blocks: tempCompactBlocks });
+    tempStateWithoutImages.messages.push({
+      role: MessageRoleType.ai,
+      content: tempContent,
+      type: MultiComponentTypes.compact,
+    });
+    setState(tempStateWithoutImages);
+    console.log('tempStateWithoutImages', JSON.stringify(tempStateWithoutImages, null, 2));
 
-    // convert CompactQuery (an AI Schema) into CompactSchema (the UI Schema)
+
+    // Load Images (and convert AI Schema into UI Schema)
     const compactBlocks: SmallBlockSchemaType[] = await Promise.all(
       uiSelection.content.blocks.map(async (block) => {
         const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
@@ -115,7 +136,7 @@ export default function IndexPage() {
     });
     newState.messages.push({
       role: MessageRoleType.ai,
-      content: content,
+      content: uiSelection.content,
       type: MultiComponentTypes.compact,
     });
     console.log('newState After updateStateFromCompact', JSON.stringify(newState, null, 2));
@@ -206,7 +227,12 @@ export default function IndexPage() {
                 <div className='flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0'>
                   {compactContent.blocks.map((block, blockIndex) => (
                     <div key={blockIndex}>
-                      {block.imgUrl && <Image src={block.imgUrl} alt={block.title} />}
+                      {block.imgUrl && <Image 
+                      src={block.imgUrl} 
+                      alt={block.title} 
+                      width={100}
+                      height={100}
+                      />}
                       <h3>{block.title}</h3>
                       {block.subtitle && <p>{block.subtitle}</p>}
                       {block.data && <p>{block.data}</p>}
@@ -234,7 +260,12 @@ export default function IndexPage() {
 
                   {carouselContent.blocks.map((block, blockIndex) => (
                     <div key={blockIndex}>
-                      <Image src={block.imgUrl} alt={block.title} />
+                      {block.imgUrl && <Image 
+                      src={block.imgUrl} 
+                      alt={block.title} 
+                      width={100}
+                      height={100}
+                      />}
                       <h3>{block.title}</h3>
                       {block.text && <p>{block.text}</p>}
                     </div>
@@ -254,7 +285,12 @@ export default function IndexPage() {
                 )}
               >
                 <div className='flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0'>
-                  <Image src={activeBlock.imgUrl} alt={activeBlock.title} />
+                {activeBlock.imgUrl && <Image 
+                      src={activeBlock.imgUrl} 
+                      alt={activeBlock.title} 
+                      width={100}
+                      height={100}
+                      />}
                   <h3>{activeBlock.title}</h3>
                   {activeBlock.text && <p>{activeBlock.text}</p>}
                 </div>
