@@ -1,6 +1,6 @@
 import Instructor from '@instructor-ai/instructor';
 import OpenAI from 'openai';
-import { MediumBlockQuery, UISelection } from './ai_schemas';
+import { MediumBlockQuery, Compact, Carousel, Focus, UISelection } from './ai_schemas';
 import { ActiveGenerators, OpenAIMessageRoleType, OpenAIMessages, MultiComponentTypes } from './schemas';
 import { fetchTopImageUrl } from './utils/query_image';
 
@@ -58,15 +58,14 @@ ${block.shortDescription}`
 export async function createGenerators(uiSelection: UISelection, messages: OpenAIMessages) {
   const activeGenerators: ActiveGenerators = [];
   activeGenerators.currentComponentType = uiSelection.element
+  console.log("UI Selection: ", uiSelection)
   uiSelection.content.blocks.forEach(async (block, index) => {
     const blockInstructionMessages = createBlockInstructionMessages(messages, block);
     const generator = await createObjectGenerator(blockInstructionMessages);
     const imgURL = await fetchTopImageUrl(block);
     activeGenerators.push({generator, blockIdx: index, imgURL});
   });
-  }
-
-return activeGenerators;
+  return activeGenerators;
 
 }
 // we will have a separates OpenAIMessages list containing the history. It will contain the user's question. then it will 
@@ -81,8 +80,8 @@ const prompt1 = "Hey there, I'm curious to learn more about the wines of italy. 
 const prompt2 = "What are top 5 largest US companies by revenue?"
 
 const messages = [{role: 'user', content: prompt2}]
-const generators = await createGenerators(messages);
-console.log(generators);
-generators.forEach(generator => {
-  console.log(generator.imgURL);
-});
+// const generators = await createGenerators(messages);
+// console.log(generators);
+// generators.forEach(generator => {
+//   console.log(generator.imgURL);
+// });
