@@ -18,8 +18,9 @@ const client = Instructor({
 });
 
 async function createObjectGenerator(messages: OpenAIMessagesType): Promise<any> {
+  const messagesCopy = messages;
   return await client.chat.completions.create({
-    messages: messages,
+    messages: messagesCopy,
     model: GPT3dot5,
     response_model: {
       schema: MediumBlockQuery,
@@ -33,6 +34,7 @@ async function createObjectGenerator(messages: OpenAIMessagesType): Promise<any>
 
 export async function makeUISelection(messages: OpenAIMessagesType): Promise<any> {
   const messagesCopy = messages;
+  console.log("MessagesCopy: ", JSON.stringify(messagesCopy))
   return await client.chat.completions.create({
     messages: messagesCopy,
     model: GPT4,

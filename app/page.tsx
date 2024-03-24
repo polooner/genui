@@ -22,6 +22,7 @@ import { z } from 'zod';
 
 import { createGenerators, makeUISelection } from '@/lib/ai';
 import {
+  ActiveGeneratorsType,
   MessageRoleType,
   MultiComponentTypes,
   OpenAIMessageRoleType,
@@ -114,7 +115,7 @@ export default function IndexPage() {
     }));
   };
 
-  const startGeneratorTimer = (generators: ActiveGenerators) => {
+  const startGeneratorTimer = (generators: ActiveGeneratorsType) => {
     const intervalId = setInterval(() => {
       setState((prevState) => {
         if (prevState.activeGenerators.generators.length === 0) {
