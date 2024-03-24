@@ -51,7 +51,7 @@ export async function fetchTopImageUrl(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ targetUrl: targetUrl, apiKey: apiKey }),
+      body: JSON.stringify({ targetUrl: targetUrl, apiKey: apiKey2 }),
     }).then(async (res) => await res.json());
 
     console.log(response);
