@@ -14,22 +14,22 @@ export const SmallBlockResponse = z.object({
   "underneath the title, and a larged bolded numerical data value on the right"
   )
 
-export const MediumBlockResponse = z.object({
-  title: z.string().describe('Title for the block'),
-  text: z.string().describe('Body text for the block'),
-}).describe("A medium sized square block. The image takes up the top half and the bottom half is text.");
+// export const MediumBlockResponse = z.object({
+//   title: z.string().describe('Title for the block'),
+//   text: z.string().describe('Body text for the block'),
+// }).describe("A medium sized square block. The image takes up the top half and the bottom half is text.");
 
 export const MediumBlockFullResponse = z.object({
   imageSearchQuery: z.string().describe('A search query for Google Images Search'),
   title: z.string().describe('Title for the block'),
-  text: z.string().describe('Body text for the block'),
-}).describe("A medium sized square block. The image takes up the top half and the bottom half is text.");
+  text: z.string().describe('Body text for the block, be verbose here'),
+}).describe("A medium sized square block. Title at the top; the image takes up the top half and the bottom half is text.");
 
-export const MediumBlockQuery = z.object({
-  imageSearchQuery: z.string().describe("Google Images search query"),
-  shortDescription: z.string().describe("A short description (one sentence) for what the content of the block should be.")
-})
-export type MediumBlockQueryType = z.infer<typeof MediumBlockQuery>;
+// export const MediumBlockQuery = z.object({
+//   imageSearchQuery: z.string().describe("Google Images search query"),
+//   shortDescription: z.string().describe("A short description (one sentence) for what the content of the block should be.")
+// })
+// export type MediumBlockQueryType = z.infer<typeof MediumBlockQuery>;
 
 // Block Lists
 export const CompactQuery = z.object({
@@ -101,8 +101,9 @@ export const UISelection = z.object({
   'respond with text, you will use these visually rich components to elevate the quality of your responses. Each UI element ' + 
   'has a unqiue situation where it is best suited. Choose the best UI element to answer the question. ' +
   'When you select the UI element, you will populate it with data. ' +
-  'YOU MUST ABSOLUTELY FILL OUT ALL THE DATA FOR EVERY REQUEST -- THE CONTENT MUST BE POPULATED WITH BLOCKS' +
-  'For the Carousel and Focus you should put in a verbose amount of info in the text.'
+  'YOU MUST ABSOLUTELY FILL OUT ALL THE DATA FOR EVERY REQUEST -- THE CONTENT MUST BE POPULATED WITH BLOCKS. ' +
+  'For the Carousel and Focus you should put in a verbose amount of info in the text. ' + 
+  'CAROUSEL AND FOCUS MUST HAVE TEXT'
 )
 export type UISelectionType = z.infer<typeof UISelection>;
 

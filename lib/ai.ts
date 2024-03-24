@@ -1,8 +1,9 @@
 import Instructor from '@instructor-ai/instructor';
 import OpenAI from 'openai';
-import { MediumBlockQuery, MediumBlockQueryType, UISelection, UISelectionType } from './ai_schemas';
+import { CarouselQuery, FocusQuery, CompactQuery, UISelection } from './ai_schemas';
 import { OpenAIMessageRoleType, OpenAIMessagesType, GeneratorJobType, ActiveGenerators, ActiveGeneratorsType } from './schemas';
 import { fetchTopImageUrl } from './utils/query_image';
+import { Carousel } from '@/components/ui/carousel';
 
 const GPT4 = 'gpt-4-0125-preview';
 const GPT3dot5 = 'gpt-3.5-turbo-0125';
@@ -36,12 +37,25 @@ export async function makeUISelection(messages: OpenAIMessagesType): Promise<any
   console.log("MessagesCopy: ", JSON.stringify(messagesCopy))
   return await client.chat.completions.create({
     messages: messagesCopy,
-    model: GPT3dot5,
+    model: GPT4,
     response_model: {
       schema: UISelection,
       name: 'value extraction',
     },
-    seed: 1,
+    max_retries: 3,
+  });
+}
+
+export async function makeCarouselQuery(messages: OpenAIMessagesType): Promise<any> {
+  const messagesCopy = messages;
+  console.log("MessagesCopy: ", JSON.stringify(messagesCopy))
+  return await client.chat.completions.create({
+    messages: messagesCopy,
+    model: GPT4,
+    response_model: {
+      schema: CarouselQuery,
+      name: 'value extraction',
+    },
     max_retries: 3,
   });
 }

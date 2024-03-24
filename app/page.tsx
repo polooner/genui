@@ -23,7 +23,6 @@ import { z } from 'zod';
 import CarouselBlock, { CardData } from '@/components/carousel-content';
 import SmallBlock from '@/components/small-block';
 import { makeUISelection } from '@/lib/ai';
-import { makeUISelection } from '@/lib/ai';
 import { UISelectionType } from '@/lib/ai_schemas';
 import {
   ActiveGeneratorsType,
@@ -191,16 +190,6 @@ export default function IndexPage() {
             text: block.text, 
           };
         })
-        uiSelection.content.blocks.map(
-          async (block): Promise<MediumBlockSchemaType> => {
-            const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
-            return {
-              imgUrl: imgUrl, // Fetch and set the actual image URL
-              title: block.title,
-              text: block.subtitle, // Assuming 'subtitle' in UI schema corresponds to 'text' in MediumBlockSchema
-            };
-          }
-        )
       );
       updatedContent =
         uiSelection.element === MultiComponentTypes.carousel
