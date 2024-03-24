@@ -15,6 +15,7 @@ export default function SmallBlock({
   subtitle,
   metric,
 }: SmallBlockProps) {
+  console.log(imgUrl);
   return (
     <div className='flex justify-around items-center p-4 border-2 border-white-500 rounded-lg w-full h-auto'>
       <Image

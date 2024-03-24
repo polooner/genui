@@ -21,6 +21,7 @@ import React, { useRef, useState } from 'react';
 import { z } from 'zod';
 
 import SmallBlock from '@/components/small-block';
+import { SparklesCore } from '@/components/ui/sparkles';
 import { createGenerators, makeUISelection } from '@/lib/ai';
 import { UISelectionType } from '@/lib/ai_schemas';
 import {
@@ -208,7 +209,7 @@ export default function IndexPage() {
   };
 
   return (
-    <main className='flex flex-col w-full items-center justify-between space-y-4 pb-40 pt-10'>
+    <main className='flex  flex-col w-full items-center justify-between space-y-4 pb-40 pt-10'>
       {state?.messages.map((message, index) => {
         if (
           message.role === MessageRoleType.human &&
@@ -318,13 +319,13 @@ export default function IndexPage() {
         return null;
       })}
 
-      <div className='fixed bottom-0 flex w-[80%] items-center space-y-3 p-5 pb-3 sm:px-0'>
+      <div className='fixed bottom-0 flex w-[80%] items-center flex-col p-5 pb-3 sm:px-0'>
         <form
-          className='w-full flex flex-row items-center p-10'
+          className='w-full flex flex-row items-center '
           ref={formRef}
           onSubmit={handleSubmit}
         >
-          <div className='flex-1 space-y-4 border-t bg-black  px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4'>
+          <div className='flex-1 space-y-4 border-t bg-black  px-4  shadow-lg sm:rounded-t-xl sm:border md:py-4'>
             <div className='flex items-center space-x-2'>
               <Textarea
                 ref={inputRef}
@@ -359,6 +360,14 @@ export default function IndexPage() {
             </div>
           </div>
         </form>
+        <SparklesCore
+          background='transparent !opacity-50'
+          minSize={0.4}
+          maxSize={0.5}
+          particleDensity={600}
+          className='w-full h-full'
+          particleColor='#FFFFFF'
+        />
       </div>
     </main>
   );
