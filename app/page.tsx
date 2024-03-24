@@ -97,7 +97,7 @@ export default function IndexPage() {
     return newState;
   };
 
-  const updateStateFromCompact = async (
+  const updateStateFromResponse = async (
     newState: any,
     uiSelection: UISelectionType
   ) => {
@@ -106,47 +106,85 @@ export default function IndexPage() {
       JSON.stringify(newState, null, 2)
     );
 
-    // Step 1: Create TempState before ImageLoading (and convert AI schema into UI schema)
-    const tempCompactBlocks: SmallBlockSchemaType[] = uiSelection.content.blocks.map((block) => {
-      return {
-        imgUrl: undefined, // Temporarily set imgUrl to undefined
+    let tempBlocks: SmallBlockSchemaType[] | MediumBlockSchemaType[] = [];
+    if (uiSelection.element === MultiComponentTypes.compact) {
+      tempBlocks = uiSelection.content.blocks.map((block) => ({
+        imgUrl: undefined, // Temporarily set imgUrl to undefined for SmallBlockSchema
         title: block.title,
         subtitle: block.subtitle,
         data: block.data,
-      };
-    });
+      }));
+    } else {
+      tempBlocks = uiSelection.content.blocks.map((block) => ({
+        imgUrl: undefined, // Temporarily set imgUrl to undefined for MediumBlockSchema
+        title: block.title,
+        text: block.subtitle, // Assuming 'subtitle' in UI schema corresponds to 'text' in MediumBlockSchema
+      }));
+    }
 
-    const tempContent = CompactSchema.parse({ blocks: tempCompactBlocks });
+    let tempContent: z.infer<typeof CompactSchema> | z.infer<typeof CarouselSchema> | z.infer<typeof FocusSchema>;
+    switch (uiSelection.element) {
+      case MultiComponentTypes.compact:
+        tempContent = CompactSchema.parse({ blocks: tempBlocks });
+        break;
+      case MultiComponentTypes.carousel:
+        tempContent = CarouselSchema.parse({ blocks: tempBlocks, scrollPosition: 0 });
+        break;
+      case MultiComponentTypes.focus:
+        tempContent = FocusSchema.parse({ blocks: tempBlocks, activeBlock: 0 });
+        break;
+      default:
+        throw new Error(`Unsupported UI element type: ${uiSelection.element}`);
+    }
     // Temporarily update the state to show the UI without images
     setState((prevState) => ({
       ...prevState,
       messages: [...prevState.messages, {
         role: MessageRoleType.ai,
         content: tempContent,
-        type: MultiComponentTypes.compact,
+        type: uiSelection.element,
       }],
     }));
 
     // Step 2: Load Images (and convert AI Schema into UI Schema)
-    const compactBlocks: SmallBlockSchemaType[] = await Promise.all(
-      uiSelection.content.blocks.map(async (block) => {
-        const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
-        return {
-          imgUrl: imgUrl, // Fetch and set the actual image URL
-          title: block.title,
-          subtitle: block.subtitle,
-          data: block.data,
-        };
-      })
-    );
+    let updatedBlocks: SmallBlockSchemaType[] | MediumBlockSchemaType[] = [];
+    let updatedContent: z.infer<typeof CompactSchema> | z.infer<typeof CarouselSchema> | z.infer<typeof FocusSchema>;
 
-    const content = CompactSchema.parse({ blocks: compactBlocks });
+    if (uiSelection.element === MultiComponentTypes.compact) {
+      updatedBlocks = await Promise.all(
+        uiSelection.content.blocks.map(async (block): Promise<SmallBlockSchemaType> => {
+          const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
+          return {
+            imgUrl: imgUrl, // Fetch and set the actual image URL
+            title: block.title,
+            subtitle: block.subtitle,
+            data: block.data,
+          };
+        })
+      );
+      updatedContent = CompactSchema.parse({ blocks: updatedBlocks });
+    } else if (uiSelection.element === MultiComponentTypes.carousel || uiSelection.element === MultiComponentTypes.focus) {
+      updatedBlocks = await Promise.all(
+        uiSelection.content.blocks.map(async (block): Promise<MediumBlockSchemaType> => {
+          const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
+          return {
+            imgUrl: imgUrl, // Fetch and set the actual image URL
+            title: block.title,
+            text: block.subtitle, // Assuming 'subtitle' in UI schema corresponds to 'text' in MediumBlockSchema
+          };
+        })
+      );
+      updatedContent = uiSelection.element === MultiComponentTypes.carousel ? CarouselSchema.parse({ blocks: updatedBlocks, scrollPosition: 0 }) : FocusSchema.parse({ blocks: updatedBlocks, activeBlock: 0 });
+    } else {
+      throw new Error(`Unsupported UI element type: ${uiSelection.element}`);
+    }
+
     // Now update the newState with the final content including images
     // This should replace the temporary message added earlier
     newState.messages[newState.messages.length - 1] = {
       role: MessageRoleType.ai,
-      content: content,
-      type: MultiComponentTypes.compact,
+      content: updatedContent,
+      type: uiSelection.element,
     };
 
     newState.openAIMessages.push({
@@ -214,9 +252,9 @@ export default function IndexPage() {
       const uiSelection = await makeUISelection(newState.openAIMessages);
       console.log('UI Selection:', JSON.stringify(uiSelection, null, 2));
 
-      if (uiSelection.element === MultiComponentTypes.compact) {
+      if (true) {
         // If the UI selection is of type 'compact', update the state accordingly
-        newState = await updateStateFromCompact(newState, uiSelection);
+        newState = await updateStateFromResponse(newState, uiSelection);
       } else {
         // Otherwise, create generators based on the UI selection
         const generators = await createGenerators(uiSelection, newState.openAIMessages);

@@ -3,7 +3,7 @@ import { MultiComponentTypes } from './schemas';
 
 // Block Primitives
 export const SmallBlockResponse = z.object({
-  imageSearchQuery: z.string(),
+  imageSearchQuery: z.string().describe('A search query for Google Images Search'),
   title: z.string(),
   subtitle: z.string().optional(),
   data: z.string().optional().describe(
@@ -19,6 +19,11 @@ export const MediumBlockResponse = z.object({
   text: z.string().describe('Body text for the block'),
 }).describe("A medium sized square block. The image takes up the top half and the bottom half is text.");
 
+export const MediumBlockFullResponse = z.object({
+  imageSearchQuery: z.string().describe('A search query for Google Images Search'),
+  title: z.string().describe('Title for the block'),
+  text: z.string().describe('Body text for the block'),
+}).describe("A medium sized square block. The image takes up the top half and the bottom half is text.");
 
 export const MediumBlockQuery = z.object({
   imageSearchQuery: z.string().describe("Google Images search query"),
@@ -45,7 +50,7 @@ export const CompactQuery = z.object({
   )
 
 export const CarouselQuery = z.object({
-  blocks: z.array(MediumBlockQuery)
+  blocks: z.array(MediumBlockFullResponse)
 })
 .describe(
   "Description:\n" +
@@ -65,7 +70,7 @@ export const CarouselQuery = z.object({
   )
 
 export const FocusQuery = z.object({
-    blocks: z.array(MediumBlockQuery),
+    blocks: z.array(MediumBlockFullResponse),
 })
 .describe(
   "Description:\n" +
@@ -95,11 +100,13 @@ export const UISelection = z.object({
   'Your task is to select is to select the appropriate UI element for answering the user question. Rather than simply ' +
   'respond with text, you will use these visually rich components to elevate the quality of your responses. Each UI element ' + 
   'has a unqiue situation where it is best suited. Choose the best UI element to answer the question. ' +
-  'When you select the UI element, you will populate it with data. For some UI elements, such as Compact, you will populate it with all of ' +
-  'content it will contain. However, for other UI elements, such as Carousel and Focus, ' + 
-  'you will instead respond with a list of short descriptions and image search queries for each block. Each block short description will be ' +
-  'given to another AI model in a downstream step to populate all components in parallel. Therefore, the short description ' + 
-  'should contain enough information for the AI to know what content it should be writing. ' +
+  'When you select the UI element, you will populate it with data. ' +
   'YOU MUST ABSOLUTELY FILL OUT THE BLOCKS FOR EVERY REQUEST -- THE CONTENT MUST BE POPULATED WITH BLOCKS'
 )
 export type UISelectionType = z.infer<typeof UISelection>;
+
+// For some UI elements, such as Compact, you will populate it with all of ' +
+//   'content it will contain. However, for other UI elements, such as Carousel and Focus, ' + 
+//   'you will instead respond with a list of short descriptions and image search queries for each block. Each block short description will be ' +
+//   'given to another AI model in a downstream step to populate all components in parallel. Therefore, the short description ' + 
+//   'should contain enough information for the AI to know what content it should be writing. ' +

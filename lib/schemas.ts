@@ -15,7 +15,7 @@ export const SmallBlockSchema = z.object({
 export type SmallBlockSchemaType = z.infer<typeof SmallBlockSchema>;
 
 export const MediumBlockSchema = z.object({
-  imgUrl: z.string().url(),
+  imgUrl: z.string().url().optional(),
   title: z.string(),
   text: z.string().optional(),
 });
