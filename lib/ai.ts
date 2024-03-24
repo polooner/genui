@@ -32,8 +32,9 @@ async function createObjectGenerator(messages: OpenAIMessagesType): Promise<any>
 }
 
 export async function makeUISelection(messages: OpenAIMessagesType): Promise<any> {
+  const messagesCopy = messages;
   return await client.chat.completions.create({
-    messages: messages,
+    messages: messagesCopy,
     model: GPT4,
     response_model: {
       schema: UISelection,
@@ -63,6 +64,7 @@ export async function createGenerators(
   uiSelection: UISelectionType,
   messages: OpenAIMessagesType
 ) {
+  const messagesCopy = messages;
   const activeGenerators: ActiveGeneratorsType = {
     generators: [], // Initialize as an empty array
     currentComponentType: uiSelection.element,
@@ -71,7 +73,7 @@ export async function createGenerators(
   console.log('UI Selection: ', uiSelection);
 
   uiSelection.content.blocks.forEach(async (block, index) => {
-    const blockInstructionMessages = createBlockInstructionMessages(messages, block);
+    const blockInstructionMessages = createBlockInstructionMessages(messagesCopy, block);
     const generator = await createObjectGenerator(blockInstructionMessages);
     const imgURL = await fetchTopImageUrl(block);
     const newGeneratorJob = { generator, blockIdx: index, imgURL };
