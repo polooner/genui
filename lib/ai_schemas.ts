@@ -95,11 +95,11 @@ const UISelection = z.object({
   'Your task is to select is to select the appropriate UI element for answering the user question. Rather than simply ' +
   'respond with text, you will use these visually rich components to elevate the quality of your responses. Each UI element ' + 
   'has a unqiue situation where it is best suited. Choose the best UI element to answer the question. ' +
-  'When you select the UI element, you will populate it with data. For some UI elements, you will populate it with all of ' +
-  'content it will contain, such as the ImageBlock object. However, for other objects which contain lists of components, ' + 
-  'you will instead respond with a list of short description for each component. Each component description will be ' +
+  'When you select the UI element, you will populate it with data. For some UI elements, such as Compact, you will populate it with all of ' +
+  'content it will contain. However, for other UI elements, such as Carousel and Focus, ' + 
+  'you will instead respond with a list of short descriptions and image search queries for each block. Each block short description will be ' +
   'given to another AI model in a downstream step to populate all components in parallel. Therefore, the short description ' + 
   'should contain enough information for the AI to know what content it should be writing.'
 )
 
-export { OpenAIMessages, MediumBlockQuery, UISelection };
+export { MediumBlockQuery, UISelection };

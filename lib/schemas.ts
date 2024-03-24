@@ -45,6 +45,10 @@ export const FocusSchema = z.object({
   activeBlock: z.number().int(),
 });
 
+export const SingleTextBlockSchema = z.object({
+  blocks: z.array(TextBlockSchema).max(1)
+})
+
 // Generator 
 export const GeneratorSchema = z.object({
   generator: z.any(),
@@ -79,7 +83,7 @@ enum MessageRoleType {
 
 const Message = z.object({
   role: z.nativeEnum(MessageRoleType),
-  content: z.union([TextBlockSchema, CompactSchema, CarouselSchema, FocusSchema]),
+  content: z.union([SingleTextBlockSchema, CompactSchema, CarouselSchema, FocusSchema]),
   type: z.nativeEnum(MultiComponentTypes).optional(),
 });
 
@@ -87,6 +91,7 @@ const Message = z.object({
 const StateSchema = z.object({
   messages: z.array(Message),
   openAIMessages: z.array(OpenAIMessage),
+  activeGenerators: ActiveGenerators
 });
 
 type Message = z.infer<typeof Message>;

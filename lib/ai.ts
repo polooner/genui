@@ -30,10 +30,10 @@ async function createObjectGenerator(messages: OpenAIMessages): Promise<any> {
   });
 }
 
-async function makeUISelection(messages: OpenAIMessages): Promise<any> {
+export async function makeUISelection(messages: OpenAIMessages): Promise<any> {
   return await client.chat.completions.create({
     messages: messages,
-    model: GPT3dot5,
+    model: GPT4,
     response_model: {
       schema: UISelection,
       name: 'value extraction',
@@ -55,26 +55,18 @@ ${block.shortDescription}`
   return newMessages;
 }
 
-// TODO: Add code for updating messages
-async function createSchemaAndGenerators(messages: OpenAIMessages) {
-  const uiSelection = await makeUISelection(messages);
-  messages.push(
-    {role: OpenAIMessageRoleType.tool, tool_call_id: 'UISelection', content: uiSelection},
-    {role: OpenAIMessageRoleType.system, content: "Now expand the block descriptions into individual blocks."}
-  )
-
+export async function createGenerators(uiSelection: UISelection, messages: OpenAIMessages) {
   const activeGenerators: ActiveGenerators = [];
   activeGenerators.currentComponentType = uiSelection.element
-  if (uiSelection.element === MultiComponentTypes.carousal || uiSelection.element === MultiComponentTypes.focus) {
-    uiSelection.content.blocks.forEach(async (block, index) => {
-      const blockInstructionMessages = createBlockInstructionMessages(messages, block);
-      const generator = await createObjectGenerator(blockInstructionMessages);
-      const imgURL = await fetchTopImageUrl(block);
-      activeGenerators.push({generator, blockIdx: index, imgURL});
-    });
+  uiSelection.content.blocks.forEach(async (block, index) => {
+    const blockInstructionMessages = createBlockInstructionMessages(messages, block);
+    const generator = await createObjectGenerator(blockInstructionMessages);
+    const imgURL = await fetchTopImageUrl(block);
+    activeGenerators.push({generator, blockIdx: index, imgURL});
+  });
   }
 
-return [uiSelection.element, activeGenerators];
+return activeGenerators;
 
 }
 // we will have a separates OpenAIMessages list containing the history. It will contain the user's question. then it will 
@@ -88,9 +80,9 @@ return [uiSelection.element, activeGenerators];
 const prompt1 = "Hey there, I'm curious to learn more about the wines of italy. Can you teach me the different types?"
 const prompt2 = "What are top 5 largest US companies by revenue?"
 
-const messages = [{role: 'user', content: prompt1}]
-const [schema, blockGenerators] = await createSchemaAndGenerators(messages);
-console.log(schema);
-console.log(blockGenerators)
-
-export { createSchemaAndGenerators }
+const messages = [{role: 'user', content: prompt2}]
+const generators = await createGenerators(messages);
+console.log(generators);
+generators.forEach(generator => {
+  console.log(generator.imgURL);
+});
