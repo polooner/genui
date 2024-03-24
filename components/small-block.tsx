@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 interface SmallBlockProps {
@@ -17,7 +18,12 @@ export default function SmallBlock({
 }: SmallBlockProps) {
   console.log(imgUrl);
   return (
-    <div className='flex justify-around items-center p-4 border-2 border-white-500 rounded-lg w-full h-auto'>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className='flex justify-around items-center p-4 border-2 border-white-500 rounded-lg w-full h-auto'
+    >
       {imgUrl ? (
         <Image
           className='h-20 w-20 shrink-0 overflow-hidden rounded-full'
@@ -40,6 +46,6 @@ export default function SmallBlock({
         <span className='text-sm text-gray-500 text-center'>{subtitle}</span>
       </div>
       <span className='text-xl font-semibold'>{metric}</span>
-    </div>
+    </motion.div>
   );
 }

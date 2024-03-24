@@ -29,7 +29,7 @@ export default function CarouselBlock({ cards }: Carouselblockprops) {
     >
       <CarouselContent className='-ml-1 w-full justify-center items-center'>
         {cards.map((card, index) => (
-          <CarouselItem key={index} className='basis-2/3'>
+          <CarouselItem key={index} className='pl-1 md:basis-1/2 lg:basis-1/3'>
             <div className='p-1'>
               <Card>
                 <CardContent className='flex justify-center flex-col aspect-square items-center'>

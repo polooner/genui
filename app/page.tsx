@@ -12,6 +12,7 @@ import {
   CarouselSchema,
   CompactSchema,
   FocusSchema,
+  MediumBlockSchemaType,
   StateSchema,
 } from '@/lib/schemas';
 import clsx from 'clsx';
@@ -118,7 +119,7 @@ export default function IndexPage() {
       tempBlocks = uiSelection.content.blocks.map((block) => ({
         imgUrl: undefined, // Temporarily set imgUrl to undefined for MediumBlockSchema
         title: block.title,
-        text: block.text, 
+        text: block.text,
       }));
     }
 
@@ -341,14 +342,17 @@ export default function IndexPage() {
               typeof CarouselSchema
             >;
             return (
-              <div
-                key={index}
-                className={clsx(
-                  'flex w-[70%] max-w-[70%] items-center justify-center border-b border-gray-200 py-6 '
-                )}
-              >
-                <CarouselBlock cards={carouselContent.blocks as CardData[]} />
-              </div>
+              <>
+                <div
+                  key={index}
+                  className={clsx(
+                    'flex w-[70%]  max-w-[70%] items-center justify-center py-6 '
+                  )}
+                >
+                  <CarouselBlock cards={carouselContent.blocks as CardData[]} />
+                </div>
+                <Separator className='w-[70%]' />
+              </>
             );
           } else if (message.type === MultiComponentTypes.focus) {
             const focusContent = message.content as z.infer<typeof FocusSchema>;
