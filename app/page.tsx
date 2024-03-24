@@ -20,24 +20,24 @@ import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react';
 import { z } from 'zod';
 
+import SmallBlock from '@/components/small-block';
 import { createGenerators, makeUISelection } from '@/lib/ai';
+import { UISelectionType } from '@/lib/ai_schemas';
 import {
   ActiveGeneratorsType,
   MessageRoleType,
   MultiComponentTypes,
   OpenAIMessageRoleType,
-  SmallBlockSchema,
-  SmallBlockSchemaType
+  SmallBlockSchemaType,
 } from '@/lib/schemas';
 import { updateState } from '@/lib/stream_handler';
-import { UISelectionType } from '@/lib/ai_schemas';
 import { fetchTopImageUrl } from '@/lib/utils/query_image';
 
 export default function IndexPage() {
   const [state, setState] = useState<z.infer<typeof StateSchema>>({
     messages: [
       {
-        content: { blocks: [{ text: 'random thing' }] },
+        content: { blocks: [{ text: 'initial' }] },
         role: MessageRoleType.human,
         type: MultiComponentTypes.text,
       },
@@ -45,7 +45,7 @@ export default function IndexPage() {
     openAIMessages: [
       {
         role: OpenAIMessageRoleType.user,
-        content: 'random thing',
+        content: 'initial',
       },
     ],
     activeGenerators: {
@@ -75,7 +75,10 @@ export default function IndexPage() {
   };
 
   const updateMessagesFromUser = (newState: any, userInput: string) => {
-    console.log('newState Before updateMessagesFromUser', JSON.stringify(newState, null, 2));
+    console.log(
+      'newState Before updateMessagesFromUser',
+      JSON.stringify(newState, null, 2)
+    );
     newState.messages.push({
       role: MessageRoleType.human,
       content: { blocks: [{ text: input }] },
@@ -85,15 +88,24 @@ export default function IndexPage() {
       role: OpenAIMessageRoleType.user,
       content: input,
     });
-    console.log('newState After updateMessagesFromUser (outside of function)', JSON.stringify(newState, null, 2));
+    console.log(
+      'newState After updateMessagesFromUser (outside of function)',
+      JSON.stringify(newState, null, 2)
+    );
     setState(newState);
     return newState;
   };
 
-  const updateStateFromCompact = async (newState: any, uiSelection: UISelectionType) => {
-    console.log('newState Before updateStateFromCompact', JSON.stringify(newState, null, 2));
+  const updateStateFromCompact = async (
+    newState: any,
+    uiSelection: UISelectionType
+  ) => {
+    console.log(
+      'newState Before updateStateFromCompact',
+      JSON.stringify(newState, null, 2)
+    );
     // Create TempState before ImageLoading (and convert AI schema into UI schema)
-    const tempStateWithoutImages = {...newState};
+    const tempStateWithoutImages = { ...newState };
     const tempCompactBlocks: SmallBlockSchemaType[] = await Promise.all(
       uiSelection.content.blocks.map(async (block) => {
         return {
@@ -111,8 +123,10 @@ export default function IndexPage() {
       type: MultiComponentTypes.compact,
     });
     setState(tempStateWithoutImages);
-    console.log('tempStateWithoutImages', JSON.stringify(tempStateWithoutImages, null, 2));
-
+    console.log(
+      'tempStateWithoutImages',
+      JSON.stringify(tempStateWithoutImages, null, 2)
+    );
 
     // Load Images (and convert AI Schema into UI Schema)
     const compactBlocks: SmallBlockSchemaType[] = await Promise.all(
@@ -139,7 +153,10 @@ export default function IndexPage() {
       content: uiSelection.content,
       type: MultiComponentTypes.compact,
     });
-    console.log('newState After updateStateFromCompact', JSON.stringify(newState, null, 2));
+    console.log(
+      'newState After updateStateFromCompact',
+      JSON.stringify(newState, null, 2)
+    );
     setState(newState);
     return newState;
   };
@@ -170,12 +187,11 @@ export default function IndexPage() {
     try {
       newState = updateMessagesFromUser(newState, input);
 
-      console.log("Making UI Selection")
+      console.log('Making UI Selection');
       const uiSelection = await makeUISelection(newState.openAIMessages);
       console.log('UI Selection:', JSON.stringify(uiSelection, null, 2));
 
       if (uiSelection.element === MultiComponentTypes.compact) {
-
         newState = updateStateFromCompact(newState, uiSelection);
       } else {
         const generators = await createGenerators(
@@ -192,21 +208,23 @@ export default function IndexPage() {
   };
 
   return (
-    <main className='flex flex-col w-full items-center justify-between pb-40 pt-10'>
+    <main className='flex flex-col w-full items-center justify-between space-y-4 pb-40 pt-10'>
       {state?.messages.map((message, index) => {
-        if (message.role === MessageRoleType.human) {
+        if (
+          message.role === MessageRoleType.human &&
+          message.content.blocks[0].text != 'initial'
+        ) {
           return (
             <div
               key={index}
               className={clsx(
-                'flex p-2 shrink-0 w-[70%] space-x-2 select-none items-center justify-center rounded-md border shadow bg-background'
+                'flex p-4 shrink-0 w-[70%] max-w-[70%] space-x-4 select-none items-center justify-center rounded-md border shadow '
               )}
             >
               <span className='ring-1 ring-accent rounded-md p-2 items-center text-center'>
                 user
               </span>
-              <div className='flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0'>
-                {/* @ts-expect-error  */}
+              <div className='flex w-full max-w-screen-md items-start space-x-4'>
                 <div>{message.content.blocks[0].text as string}</div>
               </div>
             </div>
@@ -220,25 +238,18 @@ export default function IndexPage() {
               <div
                 key={index}
                 className={clsx(
-                  'flex w-full items-center justify-center border-b border-gray-200 py-8',
-                  'bg-gray-100'
+                  'flex w-[70%] max-w-[70%] flex-col items-center justify-center border-b space-y-4 px-5 border-accent py-6 '
                 )}
               >
-                <div className='flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0'>
-                  {compactContent.blocks.map((block, blockIndex) => (
-                    <div key={blockIndex}>
-                      {block.imgUrl && <Image 
-                      src={block.imgUrl} 
-                      alt={block.title} 
-                      width={100}
-                      height={100}
-                      />}
-                      <h3>{block.title}</h3>
-                      {block.subtitle && <p>{block.subtitle}</p>}
-                      {block.data && <p>{block.data}</p>}
-                    </div>
-                  ))}
-                </div>
+                {compactContent.blocks.map((block, blockIndex) => (
+                  <SmallBlock
+                    metric={block.data as string}
+                    imgUrl={block.imgUrl as string}
+                    title={block.title}
+                    subtitle={block.subtitle as string}
+                    key={blockIndex}
+                  />
+                ))}
               </div>
             );
           } else if (message.type === MultiComponentTypes.carousel) {
@@ -249,24 +260,25 @@ export default function IndexPage() {
               <div
                 key={index}
                 className={clsx(
-                  'flex w-full items-center justify-center border-b border-gray-200 py-8',
-                  'bg-gray-100'
+                  'flex w-[70%] max-w-[70%] items-center justify-center border-b border-gray-200 py-6 '
                 )}
               >
-                <div className='flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0'>
+                <div className='flex w-full max-w-screen-md items-start space-x-4'>
                   <div
                     className={clsx('p-1.5 text-white', 'bg-green-500')}
                   ></div>
 
                   {carouselContent.blocks.map((block, blockIndex) => (
-                    <div key={blockIndex}>
-                      {block.imgUrl && <Image 
-                      src={block.imgUrl} 
-                      alt={block.title} 
-                      width={100}
-                      height={100}
-                      />}
-                      <h3>{block.title}</h3>
+                    <div key={blockIndex} className='space-y-2'>
+                      {block.imgUrl && (
+                        <Image
+                          src={block.imgUrl}
+                          alt={block.title}
+                          width={100}
+                          height={100}
+                        />
+                      )}
+                      <h3 className='text-lg font-semibold'>{block.title}</h3>
                       {block.text && <p>{block.text}</p>}
                     </div>
                   ))}
@@ -280,19 +292,24 @@ export default function IndexPage() {
               <div
                 key={index}
                 className={clsx(
-                  'flex w-full items-center justify-center border-b border-gray-200 py-8',
-                  'bg-gray-100'
+                  'flex w-[70%] max-w-[70%] items-center justify-center border-b border-gray-200 py-6 '
                 )}
               >
-                <div className='flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0'>
-                {activeBlock.imgUrl && <Image 
-                      src={activeBlock.imgUrl} 
-                      alt={activeBlock.title} 
+                <div className='flex w-full max-w-screen-md items-start space-x-4'>
+                  {activeBlock.imgUrl && (
+                    <Image
+                      src={activeBlock.imgUrl}
+                      alt={activeBlock.title}
                       width={100}
                       height={100}
-                      />}
-                  <h3>{activeBlock.title}</h3>
-                  {activeBlock.text && <p>{activeBlock.text}</p>}
+                    />
+                  )}
+                  <div className='space-y-2'>
+                    <h3 className='text-lg font-semibold'>
+                      {activeBlock.title}
+                    </h3>
+                    {activeBlock.text && <p>{activeBlock.text}</p>}
+                  </div>
                 </div>
               </div>
             );
@@ -307,7 +324,7 @@ export default function IndexPage() {
           ref={formRef}
           onSubmit={handleSubmit}
         >
-          <div className='flex-1 space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4'>
+          <div className='flex-1 space-y-4 border-t bg-black  px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4'>
             <div className='flex items-center space-x-2'>
               <Textarea
                 ref={inputRef}
@@ -326,7 +343,13 @@ export default function IndexPage() {
               />
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button type='submit' size='icon' disabled={input === ''}>
+                  <Button
+                    className='min-h-[60px] border-input px-4 min-w-16 '
+                    type='submit'
+                    size='icon'
+                    variant={'outline'}
+                    disabled={input === ''}
+                  >
                     <IconArrowElbow />
                     <span className='sr-only'>Send message</span>
                   </Button>
