@@ -15,7 +15,7 @@ async function updateState(schema: MultiComponentTypes, generators: Object[], im
             } else { // Still have content coming in
                 if (schema === MultiComponentTypes.compact) {
                     currentState.messages[gen_idx].content.blocks[gen_idx] = createSmallBlock(content, imgUrl)
-                } else if (schema == MultiComponentTypes.carousal || schema === MultiComponentTypes.focus){
+                } else if (schema === MultiComponentTypes.carousal || schema === MultiComponentTypes.focus){
                     currentState.messages[gen_idx].content.blocks[gen_idx] = createMediumBlock(content, imgUrl)
                 }
             }
