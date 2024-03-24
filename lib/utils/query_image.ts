@@ -31,9 +31,8 @@
 //   }
 // }
 
-
 // Define your Zenserp API key
-const apiKey = '46269a40-e931-11ee-8c8e-958f352332f8';
+const apiKey = 'b0522c50-ea00-11ee-9780-156486adbd1d';
 
 // Function to fetch the top image URL based on a search query
 export async function fetchTopImageUrl(
@@ -43,7 +42,7 @@ export async function fetchTopImageUrl(
   // const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
   const targetUrl = `https://app.zenserp.com/api/v2/search?q=${searchQuery}&tbm=isch&num=1`;
 
-  let url = 'http://localhost:3000/api/fetchimage/'
+  let url = 'http://localhost:3000/api/fetchimage/';
   // let url = origin_url + '/api/fetchimage/'
   try {
     const response = await fetch(url, {
@@ -51,13 +50,12 @@ export async function fetchTopImageUrl(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url, apiKey }),
-    });
-    const post_response = await response.json();
-    console.log(post_response)
-    
-    let json_reponse = await post_response.json()
-    const topImageUrl = json_reponse.image_results.sourceUrl;
+      body: JSON.stringify({ targetUrl: targetUrl, apiKey: apiKey }),
+    }).then(async (res) => await res.json());
+
+    console.log(response);
+
+    const topImageUrl = response.data.image_results[0].sourceUrl;
 
     return topImageUrl;
   } catch (error) {
@@ -66,20 +64,20 @@ export async function fetchTopImageUrl(
   }
 }
 
-async function main() {
-  const searchQuery = "coffee";
-  
-  try {
-    const topImageUrl = await fetchTopImageUrl(searchQuery);
-    if (topImageUrl) {
-      console.log("Top image URL:", topImageUrl);
-    } else {
-      console.log("No top image found.");
-    }
-  } catch (error) {
-    console.error("Error:", error);
-  }
-}
+// async function main() {
+//   const searchQuery = 'coffee';
 
-// Call the main function
-main();
+//   try {
+//     const topImageUrl = await fetchTopImageUrl(searchQuery);
+//     if (topImageUrl) {
+//       console.log('Top image URL:', topImageUrl);
+//     } else {
+//       console.log('No top image found.');
+//     }
+//   } catch (error) {
+//     console.error('Error:', error);
+//   }
+// }
+
+// // Call the main function
+// main();
