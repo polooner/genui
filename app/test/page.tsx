@@ -16,6 +16,7 @@ import { cn } from "../../lib/utils/cn";
 import { DirectionAwareHover } from "@/components/ui/direction-aware-hover";
 import Graph from "@/components/graph";
 import Scoreboard from "@/components/scoreboard";
+import { LayoutBlock } from "@/components/layout-block";
 
 export default function test() {
   //   const imageUrl =
@@ -99,8 +100,24 @@ export default function test() {
     // Add more items as needed
   ];
 
+  const Layoutblock = [
+    {
+      title: "First Title",
+      description: "This is the first description.",
+      className: "custom-class-1", // This is optional
+      thumbnail: "path/to/first/thumbnail.jpg", // This is optional
+    },
+    {
+      title: "Second Title",
+      description: "This is the second description.",
+      // className and thumbnail are optional, can be omitted
+    },
+    // Add more objects as needed
+  ];
+
   return (
     <div className="flex flex-col items-center justify-center mx-auto">
+      <LayoutBlock />
       <Graph />
       <div className="h-20"></div>
       <Scoreboard />

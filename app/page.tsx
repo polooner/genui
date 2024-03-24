@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react';
 import { z } from 'zod';
 
+import CarouselBlock, { CardData } from '@/components/carousel-content';
 import SmallBlock from '@/components/small-block';
 import { createGenerators, makeUISelection } from '@/lib/ai';
 import { UISelectionType } from '@/lib/ai_schemas';
@@ -180,6 +181,7 @@ export default function IndexPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form submission behavior
+    setInput('');
 
     // Step 1: Copy the State
     let newState = JSON.parse(JSON.stringify(state)); // Simple deep copy, consider more robust methods for complex states
@@ -268,20 +270,23 @@ export default function IndexPage() {
                     className={clsx('p-1.5 text-white', 'bg-green-500')}
                   ></div>
 
-                  {carouselContent.blocks.map((block, blockIndex) => (
-                    <div key={blockIndex} className='space-y-2'>
-                      {block.imgUrl && (
-                        <Image
-                          src={block.imgUrl}
-                          alt={block.title}
-                          width={100}
-                          height={100}
-                        />
-                      )}
-                      <h3 className='text-lg font-semibold'>{block.title}</h3>
-                      {block.text && <p>{block.text}</p>}
-                    </div>
-                  ))}
+                  <CarouselBlock cards={carouselContent.blocks as CardData[]} />
+                  {/* {carouselContent.blocks.map((block, blockIndex) => (
+                    <>
+                      <div key={blockIndex} className='space-y-2'>
+                        {block.imgUrl && (
+                          <Image
+                            src={block.imgUrl}
+                            alt={block.title}
+                            width={100}
+                            height={100}
+                          />
+                        )}
+                        <h3 className='text-lg font-semibold'>{block.title}</h3>
+                        {block.text && <p>{block.text}</p>}
+                      </div>
+                    </>
+                  ))} */}
                 </div>
               </div>
             );
