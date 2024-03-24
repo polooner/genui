@@ -6,16 +6,6 @@ enum BlockTypes {
   medium = 'medium',
 }
 
-const GeneratorSchema = z.object({
-  generators: z.array(
-    z.object({
-      generator: z.any(),
-      blockIdx: z.number().int()
-      imgURL: z.string().url()
-    })
-  )
-})
-
 const SmallBlockSchema = z.object({
   imgUrl: z.string().url(),
   title: z.string(),
@@ -55,6 +45,18 @@ export const FocusSchema = z.object({
   activeBlock: z.number().int(),
 });
 
+// Generator 
+const GeneratorSchema = z.object({
+  generator: z.any(),
+  blockIdx: z.number().int(),
+  imgURL: z.string().url().optional()
+})
+
+const ActiveGenerators = z.object({
+  generators: z.array(GeneratorSchema),
+  currentComponentType: z.nativeEnum(MultiComponentTypes)
+})
+
 // OpenAI Messages (for AI use only)
 enum OpenAIMessageRoleType {
   user = 'user',
@@ -93,6 +95,7 @@ type OpenAIMessages = z.infer<typeof OpenAIMessage>[];
 type StateSchema = z.infer<typeof StateSchema>;
 
 export {
+  ActiveGenerators,
   MessageRoleType,
   Message,
   Messages,

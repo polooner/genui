@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
-async function updateState(schema: MultiComponentTypes, generatorObject: GeneratorSchema, currentState: StateSchema): any {
+import { ActiveGenerators, StateSchema } from './schemas';
+
+async function updateState(activeGenerators: ActiveGenerators, currentState: StateSchema): any {
     try {
         let removeGeneratorIds = []
         // Process an iteration of the generators
