@@ -99,6 +99,7 @@ export const UISelection = z.object({
   'content it will contain. However, for other UI elements, such as Carousel and Focus, ' + 
   'you will instead respond with a list of short descriptions and image search queries for each block. Each block short description will be ' +
   'given to another AI model in a downstream step to populate all components in parallel. Therefore, the short description ' + 
-  'should contain enough information for the AI to know what content it should be writing.'
+  'should contain enough information for the AI to know what content it should be writing. ' +
+  'YOU MUST ABSOLUTELY FILL OUT THE BLOCKS FOR EVERY REQUEST -- THE CONTENT MUST BE POPULATED WITH BLOCKS'
 )
 export type UISelectionType = z.infer<typeof UISelection>;

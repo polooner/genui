@@ -8,14 +8,15 @@ import {
   MediumBlockSchemaType,
 } from './schemas';
 
-function isGeneratorEmpty(content: { text: string }): boolean {
-  return content.text.length > 20;
-}
+function isGeneratorEmpty(content: any): boolean {
+    return content === undefined || content.done === true;
+  }
 
 export async function updateState(
   activeGenerators: ActiveGeneratorsType,
   currentState: StateSchemaType
 ) {
+    console.log("Updating State, activeGenerators: ", activeGenerators)
   let updatedState = { ...currentState };
   try {
     // Process an iteration of the generators
@@ -23,6 +24,7 @@ export async function updateState(
     for (const generatorJob of activeGenerators.generators) {
       const generator = generatorJob.generator
       const imgUrl: string | undefined = generator.imgURL;
+      console.log("generator: ", generator)
 
       let content = await generator.next();
 
@@ -62,10 +64,6 @@ export async function updateState(
 
 }
 
-function deleteGenerator(gen_idx: number, activeGenerators: ActiveGeneratorsType): void {
-    // Delete Generator from list
-    activeGenerators.generators = activeGenerators.generators.filter(gen => gen.blockIdx !== gen_idx);
-}
 
 function createSmallBlock(content: SmallBlockSchemaType, imgUrl: string): any {
   let block = SmallBlockSchema.parse({

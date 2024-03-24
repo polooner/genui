@@ -28,7 +28,6 @@ async function createObjectGenerator(messages: OpenAIMessagesType): Promise<any>
     },
     stream: true,
     seed: 1,
-    max_retries: 3,
   });
 }
 
