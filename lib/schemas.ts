@@ -45,6 +45,7 @@ const FocusSchema = z.object({
 enum OpenAIMessageRoleType {
   user = "user",
   assistant = "assistant",
+  system = "system",
   tool = "tool"
 }
 const OpenAIMessage = z.object({
