@@ -17,7 +17,7 @@ import {
 import clsx from 'clsx';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { z } from 'zod';
 
 import CarouselBlock, { CardData } from '@/components/carousel-content';
@@ -105,36 +105,34 @@ export default function IndexPage() {
       'newState Before updateStateFromCompact',
       JSON.stringify(newState, null, 2)
     );
-    // Create TempState before ImageLoading (and convert AI schema into UI schema)
-    const tempStateWithoutImages = { ...newState };
-    const tempCompactBlocks: SmallBlockSchemaType[] = await Promise.all(
-      uiSelection.content.blocks.map(async (block) => {
-        return {
-          imgUrl: undefined,
-          title: block.title,
-          subtitle: block.subtitle,
-          data: block.data,
-        };
-      })
-    );
-    const tempContent = CompactSchema.parse({ blocks: tempCompactBlocks });
-    tempStateWithoutImages.messages.push({
-      role: MessageRoleType.ai,
-      content: tempContent,
-      type: MultiComponentTypes.compact,
-    });
-    setState(tempStateWithoutImages);
-    console.log(
-      'tempStateWithoutImages',
-      JSON.stringify(tempStateWithoutImages, null, 2)
-    );
 
-    // Load Images (and convert AI Schema into UI Schema)
+    // Step 1: Create TempState before ImageLoading (and convert AI schema into UI schema)
+    const tempCompactBlocks: SmallBlockSchemaType[] = uiSelection.content.blocks.map((block) => {
+      return {
+        imgUrl: undefined, // Temporarily set imgUrl to undefined
+        title: block.title,
+        subtitle: block.subtitle,
+        data: block.data,
+      };
+    });
+
+    const tempContent = CompactSchema.parse({ blocks: tempCompactBlocks });
+    // Temporarily update the state to show the UI without images
+    setState((prevState) => ({
+      ...prevState,
+      messages: [...prevState.messages, {
+        role: MessageRoleType.ai,
+        content: tempContent,
+        type: MultiComponentTypes.compact,
+      }],
+    }));
+
+    // Step 2: Load Images (and convert AI Schema into UI Schema)
     const compactBlocks: SmallBlockSchemaType[] = await Promise.all(
       uiSelection.content.blocks.map(async (block) => {
         const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
         return {
-          imgUrl: imgUrl,
+          imgUrl: imgUrl, // Fetch and set the actual image URL
           title: block.title,
           subtitle: block.subtitle,
           data: block.data,
@@ -143,39 +141,58 @@ export default function IndexPage() {
     );
 
     const content = CompactSchema.parse({ blocks: compactBlocks });
+    // Now update the newState with the final content including images
+    // This should replace the temporary message added earlier
+    newState.messages[newState.messages.length - 1] = {
+      role: MessageRoleType.ai,
+      content: content,
+      type: MultiComponentTypes.compact,
+    };
 
     newState.openAIMessages.push({
       role: OpenAIMessageRoleType.function,
       name: 'UISelection',
-      content: content,
+      content: JSON.stringify(uiSelection),
     });
-    newState.messages.push({
-      role: MessageRoleType.ai,
-      content: uiSelection.content,
-      type: MultiComponentTypes.compact,
-    });
+
     console.log(
       'newState After updateStateFromCompact',
       JSON.stringify(newState, null, 2)
     );
+
+    // Finally, update the state with the new content including images
     setState(newState);
     return newState;
   };
 
-  const startGeneratorTimer = (generators: ActiveGeneratorsType) => {
-    const intervalId = setInterval(() => {
-      setState((prevState) => {
-        if (prevState.activeGenerators.generators.length === 0) {
-          clearInterval(intervalId);
-          return prevState;
-        }
-        const updatedGenerators = {
-          ...prevState.activeGenerators,
-          generators: generators.generators,
-        };
-        const updatedState = updateState(updatedGenerators, state);
-        return updatedState;
-      });
+  // Ref to track the latest state
+  const currentStateRef = useRef(state);
+  // Update the ref every time the state changes
+  useEffect(() => {
+    currentStateRef.current = state;
+  }, [state]);
+
+  const startGeneratorTimer = (activeGenerators: ActiveGeneratorsType) => {
+    console.log("Starting Generators: ", activeGenerators);
+    const intervalId = setInterval(async () => {
+      console.log("Interval Running");
+      // Use the current state from the ref
+      const currentState = currentStateRef.current;
+      console.log("Current State: ", currentState);
+      try {
+        // if (currentState.activeGenerators.generators.length === 0) {
+        //   clearInterval(intervalId);
+        //   console.log("No generators left, stopping interval.");
+        //   return;
+        // }
+        console.log("Updating State with currentState:", currentState);
+        const updatedState = await updateState({ ...currentState.activeGenerators, generators: currentState.activeGenerators.generators }, currentState);
+        // Update the state with the result
+        setState(updatedState);
+      } catch (error) {
+        console.error('Error updating state within interval:', error);
+        clearInterval(intervalId); // Consider clearing interval on error to prevent endless error loop
+      }
     }, 100);
   };
 
@@ -183,29 +200,39 @@ export default function IndexPage() {
     e.preventDefault(); // Prevent default form submission behavior
     setInput('');
 
-    // Step 1: Copy the State
-    let newState = JSON.parse(JSON.stringify(state)); // Simple deep copy, consider more robust methods for complex states
+    setLoading(true); // Indicate loading state
 
     try {
+      // Step 1: Copy the State
+      let newState = JSON.parse(JSON.stringify(state)); // Simple deep copy, consider more robust methods for complex states
+
+      // Update messages from user input
       newState = updateMessagesFromUser(newState, input);
 
       console.log('Making UI Selection');
+      // Make UI selection based on the open AI messages
       const uiSelection = await makeUISelection(newState.openAIMessages);
       console.log('UI Selection:', JSON.stringify(uiSelection, null, 2));
 
       if (uiSelection.element === MultiComponentTypes.compact) {
-        newState = updateStateFromCompact(newState, uiSelection);
+        // If the UI selection is of type 'compact', update the state accordingly
+        newState = await updateStateFromCompact(newState, uiSelection);
       } else {
-        const generators = await createGenerators(
-          uiSelection,
-          newState.openAIMessages
-        );
+        // Otherwise, create generators based on the UI selection
+        const generators = await createGenerators(uiSelection, newState.openAIMessages);
+        
+        // IMPORTANT: Update the state with the new active generators before starting the timer
+        newState.activeGenerators = generators; // Set the active generators to the newly created ones
+        setState(newState); // Update the state with the new active generators
+
+        // Start the generator timer with the updated state's active generators
         startGeneratorTimer(generators);
       }
     } catch (error) {
       console.error('Error in handleSubmit:', error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading state
+      setInput(''); // Clear the input field
     }
   };
 

@@ -33,6 +33,7 @@
 
 // Define your Zenserp API key
 const apiKey = 'b0522c50-ea00-11ee-9780-156486adbd1d';
+const apiKey2 = 'e76c3150-ea00-11ee-8c11-45b8e8a7abbc';
 
 // Function to fetch the top image URL based on a search query
 export async function fetchTopImageUrl(
