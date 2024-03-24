@@ -22,7 +22,7 @@ import { z } from 'zod';
 
 import CarouselBlock, { CardData } from '@/components/carousel-content';
 import SmallBlock from '@/components/small-block';
-import { createGenerators, makeUISelection } from '@/lib/ai';
+import { makeUISelection } from '@/lib/ai';
 import { UISelectionType } from '@/lib/ai_schemas';
 import {
   ActiveGeneratorsType,
@@ -118,7 +118,7 @@ export default function IndexPage() {
       tempBlocks = uiSelection.content.blocks.map((block) => ({
         imgUrl: undefined, // Temporarily set imgUrl to undefined for MediumBlockSchema
         title: block.title,
-        text: block.subtitle, // Assuming 'subtitle' in UI schema corresponds to 'text' in MediumBlockSchema
+        text: block.text, 
       }));
     }
 
@@ -170,7 +170,7 @@ export default function IndexPage() {
           return {
             imgUrl: imgUrl, // Fetch and set the actual image URL
             title: block.title,
-            text: block.subtitle, // Assuming 'subtitle' in UI schema corresponds to 'text' in MediumBlockSchema
+            text: block.text, 
           };
         })
       );

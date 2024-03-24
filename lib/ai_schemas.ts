@@ -101,7 +101,8 @@ export const UISelection = z.object({
   'respond with text, you will use these visually rich components to elevate the quality of your responses. Each UI element ' + 
   'has a unqiue situation where it is best suited. Choose the best UI element to answer the question. ' +
   'When you select the UI element, you will populate it with data. ' +
-  'YOU MUST ABSOLUTELY FILL OUT THE BLOCKS FOR EVERY REQUEST -- THE CONTENT MUST BE POPULATED WITH BLOCKS'
+  'YOU MUST ABSOLUTELY FILL OUT ALL THE DATA FOR EVERY REQUEST -- THE CONTENT MUST BE POPULATED WITH BLOCKS' +
+  'For the Carousel and Focus you should put in a verbose amount of info in the text.'
 )
 export type UISelectionType = z.infer<typeof UISelection>;
 
