@@ -22,7 +22,7 @@ import { z } from 'zod';
 
 import CarouselBlock, { CardData } from '@/components/carousel-content';
 import SmallBlock from '@/components/small-block';
-import { makeUISelection } from '@/lib/ai';
+import { Separator } from '@/components/ui/separator';
 import { makeUISelection } from '@/lib/ai';
 import { UISelectionType } from '@/lib/ai_schemas';
 import {
@@ -119,7 +119,7 @@ export default function IndexPage() {
       tempBlocks = uiSelection.content.blocks.map((block) => ({
         imgUrl: undefined, // Temporarily set imgUrl to undefined for MediumBlockSchema
         title: block.title,
-        text: block.text, 
+        text: block.text,
       }));
     }
 
@@ -183,21 +183,13 @@ export default function IndexPage() {
       uiSelection.element === MultiComponentTypes.focus
     ) {
       updatedBlocks = await Promise.all(
-        uiSelection.content.blocks.map(async (block): Promise<MediumBlockSchemaType> => {
-          const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
-          return {
-            imgUrl: imgUrl, // Fetch and set the actual image URL
-            title: block.title,
-            text: block.text, 
-          };
-        })
         uiSelection.content.blocks.map(
           async (block): Promise<MediumBlockSchemaType> => {
             const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
             return {
               imgUrl: imgUrl, // Fetch and set the actual image URL
               title: block.title,
-              text: block.subtitle, // Assuming 'subtitle' in UI schema corresponds to 'text' in MediumBlockSchema
+              text: block.text,
             };
           }
         )
@@ -355,10 +347,11 @@ export default function IndexPage() {
               <div
                 key={index}
                 className={clsx(
-                  'flex w-[70%] max-w-[70%] items-center justify-center border-b border-gray-200 py-6 '
+                  'flex w-[70%] max-w-[70%] items-center justify-center py-6 '
                 )}
               >
                 <CarouselBlock cards={carouselContent.blocks as CardData[]} />
+                <Separator />
               </div>
             );
           } else if (message.type === MultiComponentTypes.focus) {
