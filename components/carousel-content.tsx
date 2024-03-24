@@ -1,32 +1,54 @@
-import * as React from "react"
-
-import { Card, CardContent } from "@/components/ui/card"
+"use client";
+import * as React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"
+} from "@/components/ui/carousel";
 
-export function CarouselSpacing() {
+interface CardData {
+  imgUrl: string;
+  title: string;
+  subtitle: string;
+}
+
+interface Carouselblockprops {
+  cards: CardData[];
+}
+
+export default function CarouselBlock({ cards }: Carouselblockprops) {
   return (
-    <Carousel className="w-full max-w-sm">
-      <CarouselContent className="-ml-1">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <CarouselItem key={index} className="pl-1 md:basis-1/2 lg:basis-1/3">
-            <div className="p-1">
-              <Card>
-                <CardContent className="flex aspect-square items-center justify-center p-6">
-                  <span className="text-2xl font-semibold">{index + 1}</span>
-                </CardContent>
-              </Card>
-            </div>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
-    </Carousel>
-  )
+    <div className="flex flex-col items-center justify-center">
+      <Carousel className="w-full max-w-sm">
+        <CarouselContent className="-ml-1">
+          {cards.map((card, index) => (
+            <CarouselItem key={index} className="pl-1 lg:basis-2/3">
+              <div className="p-1">
+                <Card>
+                  <CardContent className="flex flex-col aspect-square items-center">
+                    <img
+                      className="rounded-lg"
+                      src={card.imgUrl}
+                      alt="Description of the image"
+                    />
+                    <span className="text-xl mt-2 font-semibold">
+                      {card.title}
+                    </span>
+                    <span className="text-xs text-center p-4">
+                      {card.subtitle}
+                    </span>
+                  </CardContent>
+                </Card>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+    </div>
+  );
 }
