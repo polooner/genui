@@ -126,8 +126,10 @@ export default function IndexPage() {
       updateMessagesFromUser(input);
 
       const uiSelection = await makeUISelection(state.openAIMessages);
+      console.log('UI Selection:', uiSelection);
 
       if (uiSelection.element === MultiComponentTypes.compact) {
+        console.log('Updating State from Compact');
         updateStateFromCompact(uiSelection.content);
       } else {
         const generators = await createGenerators(

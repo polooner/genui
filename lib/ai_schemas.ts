@@ -1,10 +1,8 @@
 import { z } from 'zod';
 import { MultiComponentTypes } from './schemas';
 
-// Messages
-
 // Block Primitives
-const SmallBlockResponse = z.object({
+export const SmallBlockResponse = z.object({
   imageSearchQuery: z.string(),
   title: z.string(),
   subtitle: z.string().optional(),
@@ -16,18 +14,18 @@ const SmallBlockResponse = z.object({
   "underneath the title, and a larged bolded numerical data value on the right"
   )
 
-const MediumBlockResponse = z.object({
+export const MediumBlockResponse = z.object({
   title: z.string().describe('Title for the block'),
   text: z.string().describe('Body text for the block'),
 }).describe("A medium sized square block. The image takes up the top half and the bottom half is text.");
 
-const MediumBlockQuery = z.object({
+export const MediumBlockQuery = z.object({
   imageSearchQuery: z.string().describe("Google Images search query"),
   shortDescription: z.string().describe("A short description (one sentence) for what the content of the block should be.")
 })
 
 // Block Lists
-const Compact = z.object({
+export const Compact = z.object({
   blocks: z.array(SmallBlockResponse)
 })
 .describe(
@@ -44,7 +42,7 @@ const Compact = z.object({
   "Q) What are the largest companies by employee count?"
   )
 
-const Carousal = z.object({
+export const Carousel = z.object({
   blocks: z.array(MediumBlockQuery)
 })
 .describe(
@@ -64,7 +62,7 @@ const Carousal = z.object({
   "Q) Can you outline a 3-day tour plan for Rome?"
   )
 
-const Focus = z.object({
+export const Focus = z.object({
     blocks: z.array(MediumBlockQuery),
 })
 .describe(
@@ -86,10 +84,10 @@ const Focus = z.object({
 )
 
 // UI Selection
-const UISelection = z.object({
+export const UISelection = z.object({
   chainOfThought: z.string().describe("Think step by step about which UI element would be best for the user's request."),
   element: z.nativeEnum(MultiComponentTypes),
-  content: z.union([Compact, Carousal, Focus])
+  content: z.union([Compact, Carousel, Focus])
 })
 .describe(
   'Your task is to select is to select the appropriate UI element for answering the user question. Rather than simply ' +
@@ -101,5 +99,3 @@ const UISelection = z.object({
   'given to another AI model in a downstream step to populate all components in parallel. Therefore, the short description ' + 
   'should contain enough information for the AI to know what content it should be writing.'
 )
-
-export { MediumBlockQuery, UISelection };
