@@ -20,6 +20,9 @@ import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react';
 import { z } from 'zod';
 
+import { createSchemaAndGenerators } from '@/lib/ai';
+import { MessageRoleType, OpenAIMessageRoleType } from '@/lib/schemas';
+
 export default function IndexPage() {
   const [messages, setMessages] = useState<z.infer<typeof StateSchema>>(
     {} as z.infer<typeof StateSchema>
@@ -45,10 +48,51 @@ export default function IndexPage() {
     }
   };
 
+  const updateMessages = (newMessage: any) => {
+    setMessages((prevMessages) => ({
+      ...prevMessages,
+      messages: [
+        ...prevMessages.messages,
+        {
+          role: MessageRoleType.human,
+          content: newMessage,
+        },
+      ],
+    }));
+    setMessages((prevMessages) => ({
+      ...prevMessages,
+      openAIMessages: [
+        ...prevMessages.openAIMessages,
+        {
+          role: OpenAIMessageRoleType.user,
+          content: newMessage,
+        },
+      ],
+    }));
+  };
+
+  const startGeneratorTimer = () => {
+    console.log("Dummy startGeneratorTimer function");
+  };
+
+  const handleSubmit = async () => {
+    try {
+      updateMessages(input);
+      const [schema, blockGenerators] = await createSchemaAndGenerators(messages);
+      console.log("Schema:", schema);
+      console.log("Block Generators:", blockGenerators);
+      startGeneratorTimer();
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className='flex flex-col w-full items-center justify-between pb-40 pt-10'>
       {messages.map((message, index) => {
-        if (message.role === 'Human') {
+        if (message.role === 'human') {
           return (
             <div
               key={index}

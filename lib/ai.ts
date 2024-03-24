@@ -58,7 +58,8 @@ ${block.shortDescription}`
 async function createSchemaAndGenerators(messages: OpenAIMessages) {
   const uiSelection = await makeUISelection(messages);
   messages.push(
-    {role: OpenAIMessageRoleType.tool, tool_call_id: 'UISelection', content: uiSelection}
+    {role: OpenAIMessageRoleType.tool, tool_call_id: 'UISelection', content: uiSelection},
+    {role: OpenAIMessageRoleType.system, content: "Now expand the block descriptions into individual blocks."}
   )
 
   const generators: Promise<any>[] = [];
@@ -87,3 +88,5 @@ const messages = [{role: 'user', content: prompt1}]
 const [schema, blockGenerators] = await createSchemaAndGenerators(messages);
 console.log(schema);
 console.log(blockGenerators)
+
+export { createSchemaAndGenerators }

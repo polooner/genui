@@ -29,11 +29,16 @@ const MediumBlockSchema = z.object({
   data: z.string().optional(),
 });
 
+const TextBlockSchema = z.object({
+  text: z.string()
+});
+
 // MultiComponents
 enum MultiComponentTypes {
   compact = 'compact',
   carousal = 'carousal',
   focus = 'focus',
+  text = 'text'
 }
 
 export const CompactSchema = z.object({
@@ -54,8 +59,10 @@ export const FocusSchema = z.object({
 enum OpenAIMessageRoleType {
   user = 'user',
   assistant = 'assistant',
-  tool = 'tool',
+  system = 'system',
+  tool = 'tool'
 }
+
 const OpenAIMessage = z.object({
   role: z.nativeEnum(OpenAIMessageRoleType),
   content: z.string(),
@@ -63,10 +70,15 @@ const OpenAIMessage = z.object({
 });
 
 // State Messages (for frontend use)
+enum MessageRoleType {
+  human = 'human',
+  ai = 'AI'
+}
+
 const Message = z.object({
-  role: z.enum(['human', 'AI']),
-  content: z.union([z.string(), CompactSchema, CarousalSchema, FocusSchema]),
-  type: z.nativeEnum(MultiComponentTypes),
+  role: z.nativeEnum(MessageRoleType),
+  content: z.union([TextBlockSchema, CompactSchema, CarouselSchema, FocusSchema]),
+  type: z.nativeEnum(MultiComponentTypes).optional(),
 });
 
 // State
@@ -81,6 +93,7 @@ type OpenAIMessages = z.infer<typeof OpenAIMessage>[];
 type StateSchema = z.infer<typeof StateSchema>;
 
 export {
+  MessageRoleType,
   Message,
   Messages,
   MultiComponentTypes,
