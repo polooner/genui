@@ -21,7 +21,6 @@ import React, { useRef, useState } from 'react';
 import { z } from 'zod';
 
 import SmallBlock from '@/components/small-block';
-import { SparklesCore } from '@/components/ui/sparkles';
 import { createGenerators, makeUISelection } from '@/lib/ai';
 import { UISelectionType } from '@/lib/ai_schemas';
 import {
@@ -360,14 +359,14 @@ export default function IndexPage() {
             </div>
           </div>
         </form>
-        <SparklesCore
+        {/* <SparklesCore
           background='transparent !opacity-50'
           minSize={0.4}
           maxSize={0.5}
           particleDensity={600}
           className='w-full h-full'
           particleColor='#FFFFFF'
-        />
+        /> */}
       </div>
     </main>
   );
