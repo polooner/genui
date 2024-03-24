@@ -6,6 +6,16 @@ enum BlockTypes {
   medium = 'medium',
 }
 
+const GeneratorSchema = z.object({
+  generators: z.array(
+    z.object({
+      generator: z.any(),
+      blockIdx: z.number().int()
+      imgURL: z.string().url()
+    })
+  )
+})
+
 const SmallBlockSchema = z.object({
   imgUrl: z.string().url(),
   title: z.string(),

@@ -1,17 +1,17 @@
 import { z } from 'zod';
 
-async function updateState(schema: MultiComponentTypes, generators: Object[], image_urls: string[], currentState: StateSchema): any {
-
+async function updateState(schema: MultiComponentTypes, generatorObject: GeneratorSchema, currentState: StateSchema): any {
     try {
+        let removeGeneratorIds = []
         // Process an iteration of the generators
-        for (let gen_idx = 0; gen_idx < generators.length; gen_idx++) {
-            const generator = generators[gen_idx];
+        for (let gen_idx = 0; gen_idx < generatorObject.generators.length; gen_idx++) {
+            const generator = generatorObject.generators[gen_idx];
             const imgUrl = image_urls[gen_idx];
             
             let content = await generator.generate();
 
             if (finishedTokens(content)) {
-                deleteGenerator(gen_idx);
+                deleteGenerator(gen_idx, generatorObject);
             } else { // Still have content coming in
                 if (schema === MultiComponentTypes.compact) {
                     currentState.messages[gen_idx].content.blocks[gen_idx] = createSmallBlock(content, imgUrl)
@@ -26,8 +26,9 @@ async function updateState(schema: MultiComponentTypes, generators: Object[], im
     // ADD Set State
 }
 
-function deleteGenerator(gen_idx): {
+function deleteGenerator(gen_idx, generatorObject): {
     // Delete Generator from list
+    generatorObject.genAvailable.pop()
 }
 
 function createSmallBlock(content: Object, imgUrl: string): any {
