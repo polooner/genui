@@ -18,10 +18,11 @@ export async function updateState(
   try {
     // Process an iteration of the generators
     let removeGeneratorIds: number[] = [];
-    for (const generator of activeGenerators.generators) {
+    for (const generatorJob of activeGenerators.generators) {
+      const generator = generatorJob.generator
       const imgUrl: string | undefined = generator.imgURL;
 
-      let content = await generator.generate();
+      let content = await generator.next();
 
       if (isGeneratorEmpty(content)) {
         removeGeneratorIds.push(generator.blockIdx);

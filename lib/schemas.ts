@@ -50,14 +50,14 @@ export const SingleTextBlockSchema = z.object({
 });
 
 // Generator
-export const GeneratorSchema = z.object({
+export const GeneratorJobSchema = z.object({
   generator: z.any(),
   blockIdx: z.number().int(),
   imgURL: z.string().url().optional(),
 });
 
 export const ActiveGenerators = z.object({
-  generators: z.array(GeneratorSchema),
+  generators: z.array(GeneratorJobSchema),
   currentComponentType: z.nativeEnum(MultiComponentTypes),
 });
 
