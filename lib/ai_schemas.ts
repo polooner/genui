@@ -19,10 +19,12 @@ export const MediumBlockResponse = z.object({
   text: z.string().describe('Body text for the block'),
 }).describe("A medium sized square block. The image takes up the top half and the bottom half is text.");
 
+
 export const MediumBlockQuery = z.object({
   imageSearchQuery: z.string().describe("Google Images search query"),
   shortDescription: z.string().describe("A short description (one sentence) for what the content of the block should be.")
 })
+export type MediumBlockQueryType = z.infer<typeof MediumBlockQuery>;
 
 // Block Lists
 export const Compact = z.object({
@@ -99,3 +101,4 @@ export const UISelection = z.object({
   'given to another AI model in a downstream step to populate all components in parallel. Therefore, the short description ' + 
   'should contain enough information for the AI to know what content it should be writing.'
 )
+export type UISelectionType = z.infer<typeof UISelection>;

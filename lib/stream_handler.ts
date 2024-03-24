@@ -1,9 +1,11 @@
 import {
   ActiveGeneratorsType,
-  MediumBlockSchema,
+  StateSchemaType,
   MultiComponentTypes,
   SmallBlockSchema,
-  StateSchema,
+  SmallBlockSchemaType,
+  MediumBlockSchema,
+  MediumBlockSchemaType,
 } from './schemas';
 
 function isGeneratorEmpty(content: { text: string }): boolean {
@@ -12,8 +14,8 @@ function isGeneratorEmpty(content: { text: string }): boolean {
 
 export async function updateState(
   activeGenerators: ActiveGeneratorsType,
-  currentState: StateSchema
-): any {
+  currentState: StateSchemaType
+) {
   let updatedState = { ...currentState };
   try {
     // Process an iteration of the generators
@@ -60,12 +62,12 @@ export async function updateState(
 
 }
 
-function deleteGenerator(gen_idx: number, activeGenerators: ActiveGenerators): void {
+function deleteGenerator(gen_idx: number, activeGenerators: ActiveGeneratorsType): void {
     // Delete Generator from list
     activeGenerators.generators = activeGenerators.generators.filter(gen => gen.blockIdx !== gen_idx);
 }
 
-function createSmallBlock(content: Object, imgUrl: string): any {
+function createSmallBlock(content: SmallBlockSchemaType, imgUrl: string): any {
   let block = SmallBlockSchema.parse({
     imgUrl: imgUrl,
     title: content.title,
@@ -76,7 +78,7 @@ function createSmallBlock(content: Object, imgUrl: string): any {
   return block;
 }
 
-function createMediumBlock(content: Object, imgUrl: string): any {
+function createMediumBlock(content: MediumBlockSchemaType, imgUrl: string): any {
   let block = MediumBlockSchema.parse({
     imgUrl: imgUrl,
     title: content.title,

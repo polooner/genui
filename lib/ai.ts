@@ -1,7 +1,7 @@
 import Instructor from '@instructor-ai/instructor';
 import OpenAI from 'openai';
-import { MediumBlockQuery, UISelection } from './ai_schemas';
-import { OpenAIMessageRoleType, OpenAIMessages } from './schemas';
+import { MediumBlockQuery, MediumBlockQueryType, UISelection, UISelectionType } from './ai_schemas';
+import { OpenAIMessageRoleType, OpenAIMessagesType, GeneratorJobType, ActiveGenerators, ActiveGeneratorsType } from './schemas';
 import { fetchTopImageUrl } from './utils/query_image';
 
 const GPT4 = 'gpt-4-0125-preview';
@@ -17,7 +17,7 @@ const client = Instructor({
   mode: 'FUNCTIONS',
 });
 
-async function createObjectGenerator(messages: OpenAIMessages): Promise<any> {
+async function createObjectGenerator(messages: OpenAIMessagesType): Promise<any> {
   return await client.chat.completions.create({
     messages: messages,
     model: GPT3dot5,
@@ -31,7 +31,7 @@ async function createObjectGenerator(messages: OpenAIMessages): Promise<any> {
   });
 }
 
-export async function makeUISelection(messages: OpenAIMessages): Promise<any> {
+export async function makeUISelection(messages: OpenAIMessagesType): Promise<any> {
   return await client.chat.completions.create({
     messages: messages,
     model: GPT4,
@@ -45,8 +45,8 @@ export async function makeUISelection(messages: OpenAIMessages): Promise<any> {
 }
 
 function createBlockInstructionMessages(
-  messages: OpenAIMessages,
-  block: MediumBlockQuery
+  messages: OpenAIMessagesType,
+  block: MediumBlockQueryType
 ): OpenAIMessages {
   const newMessages = [...messages];
   const instructionMessage = {
@@ -60,20 +60,22 @@ ${block.shortDescription}`,
 }
 
 export async function createGenerators(
-  uiSelection: UISelection,
-  messages: OpenAIMessages
+  uiSelection: UISelectionType,
+  messages: OpenAIMessagesType
 ) {
-  const activeGenerators: ActiveGenerators = [];
+  const activeGenerators: ActiveGeneratorsType = {
+    generators: [], // Initialize as an empty array
+    currentComponentType: uiSelection.element,
+  };
   activeGenerators.currentComponentType = uiSelection.element;
   console.log('UI Selection: ', uiSelection);
+
   uiSelection.content.blocks.forEach(async (block, index) => {
-    const blockInstructionMessages = createBlockInstructionMessages(
-      messages,
-      block
-    );
+    const blockInstructionMessages = createBlockInstructionMessages(messages, block);
     const generator = await createObjectGenerator(blockInstructionMessages);
     const imgURL = await fetchTopImageUrl(block);
-    activeGenerators.push({ generator, blockIdx: index, imgURL });
+    const newGeneratorJob = { generator, blockIdx: index, imgURL };
+    activeGenerators.generators.push(newGeneratorJob);
   });
   return activeGenerators;
 }

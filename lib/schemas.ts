@@ -12,12 +12,14 @@ export const SmallBlockSchema = z.object({
   subtitle: z.string().optional(),
   data: z.string().optional(),
 });
+export type SmallBlockSchemaType = z.infer<typeof SmallBlockSchema>;
 
 export const MediumBlockSchema = z.object({
   imgUrl: z.string().url(),
   title: z.string(),
-  data: z.string().optional(),
+  text: z.string().optional(),
 });
+export type MediumBlockSchemaType = z.infer<typeof MediumBlockSchema>;
 
 export const TextBlockSchema = z.object({
   text: z.string(),
@@ -55,11 +57,13 @@ export const GeneratorJobSchema = z.object({
   blockIdx: z.number().int(),
   imgURL: z.string().url().optional(),
 });
+export type GeneratorJobType = z.infer<typeof GeneratorJobSchema>;
 
 export const ActiveGenerators = z.object({
   generators: z.array(GeneratorJobSchema),
   currentComponentType: z.nativeEnum(MultiComponentTypes),
 });
+export type ActiveGeneratorsType = z.infer<typeof ActiveGenerators>;
 
 // OpenAI Messages (for AI use only)
 enum OpenAIMessageRoleType {
@@ -74,6 +78,7 @@ const OpenAIMessage = z.object({
   content: z.string(),
   name: z.string().optional(),
 });
+type OpenAIMessagesType = z.infer<typeof OpenAIMessage>[];
 
 // State Messages (for frontend use)
 enum MessageRoleType {
@@ -91,6 +96,8 @@ const Message = z.object({
   ]),
   type: z.nativeEnum(MultiComponentTypes).optional(),
 });
+type MessageType = z.infer<typeof Message>;
+type MessagesType = z.infer<typeof Message>[];
 
 // State
 const StateSchema = z.object({
@@ -98,20 +105,16 @@ const StateSchema = z.object({
   openAIMessages: z.array(OpenAIMessage),
   activeGenerators: ActiveGenerators,
 });
+type StateSchemaType = z.infer<typeof StateSchema>;
 
-type Message = z.infer<typeof Message>;
-type Messages = z.infer<typeof Message>[];
-type OpenAIMessages = z.infer<typeof OpenAIMessage>[];
-type StateSchema = z.infer<typeof StateSchema>;
-type ActiveGeneratorsType = z.infer<typeof ActiveGenerators>;
 
 export {
   ActiveGeneratorsType,
-  Message,
+  MessageType,
   MessageRoleType,
-  Messages,
+  MessagesType,
   MultiComponentTypes,
   OpenAIMessageRoleType,
-  OpenAIMessages,
-  StateSchema,
+  OpenAIMessagesType,
+  StateSchemaType,
 };
