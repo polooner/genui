@@ -37,6 +37,16 @@ export default function IndexPage() {
         type: 'compact',
       },
     ],
+    openAIMessages: [
+      {
+        role: OpenAIMessageRoleType.user,
+        content: 'random thing',
+      },
+    ],
+    activeGenerators: {
+      generators: [],
+      currentComponentType: MultiComponentTypes.compact,
+    },
   } as z.infer<typeof StateSchema>);
   const [input, setInput] = useState('');
   const [isLoading, setLoading] = useState(false);
@@ -60,20 +70,17 @@ export default function IndexPage() {
   };
 
   const updateMessagesFromUser = (newMessage: any) => {
-    setState((prevMessages) => ({
-      ...prevMessages,
+    setState((prevState: StateSchemaType) => ({
+      ...prevState,
       messages: [
-        ...prevMessages.messages,
+        ...prevState.messages,
         {
           role: MessageRoleType.human,
           content: newMessage,
         },
       ],
-    }));
-    setState((prevMessages) => ({
-      ...prevMessages,
       openAIMessages: [
-        ...prevMessages.openAIMessages,
+        ...prevState.openAIMessages,
         {
           role: OpenAIMessageRoleType.user,
           content: newMessage,
