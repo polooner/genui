@@ -6,20 +6,20 @@ enum BlockTypes {
   medium = 'medium',
 }
 
-const SmallBlockSchema = z.object({
+export const SmallBlockSchema = z.object({
   imgUrl: z.string().url(),
   title: z.string(),
   subtitle: z.string().optional(),
   data: z.string().optional(),
 });
 
-const MediumBlockSchema = z.object({
+export const MediumBlockSchema = z.object({
   imgUrl: z.string().url(),
   title: z.string(),
   data: z.string().optional(),
 });
 
-const TextBlockSchema = z.object({
+export const TextBlockSchema = z.object({
   text: z.string()
 });
 
@@ -46,13 +46,13 @@ export const FocusSchema = z.object({
 });
 
 // Generator 
-const GeneratorSchema = z.object({
+export const GeneratorSchema = z.object({
   generator: z.any(),
   blockIdx: z.number().int(),
   imgURL: z.string().url().optional()
 })
 
-const ActiveGenerators = z.object({
+export const ActiveGenerators = z.object({
   generators: z.array(GeneratorSchema),
   currentComponentType: z.nativeEnum(MultiComponentTypes)
 })
@@ -95,7 +95,6 @@ type OpenAIMessages = z.infer<typeof OpenAIMessage>[];
 type StateSchema = z.infer<typeof StateSchema>;
 
 export {
-  ActiveGenerators,
   MessageRoleType,
   Message,
   Messages,
