@@ -1,6 +1,29 @@
 import * as React from "react";
+import { useState } from "react";
+import { Line } from "react-chartjs-2";
+import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+
+Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export default function Graph() {
+  const [graphData, setGraphData] = useState({
+    price: "$547.10",
+    change: "+1.12%",
+    previousClose: "$548.22",
+    open: "$546.20",
+  });
+
+  const handleUpdateGraph = () => {
+    // This function would ideally fetch new data and update the state
+    // For demonstration, let's simulate an update
+    setGraphData({
+      price: "$550.30",
+      change: "+0.58%",
+      previousClose: "$547.10",
+      open: "$549.00",
+    });
+  };
+
   return (
     <div className="flex flex-col self-stretch px-8 py-8 bg-white rounded-lg border border-gray-100 border-solid leading-[130%] max-w-[456px]">
       <div className="flex flex-col">
@@ -11,9 +34,11 @@ export default function Graph() {
             className="shrink-0 border border-solid shadow-sm aspect-square border-black border-opacity-10 w-[60px]"
           />
           <div className="flex flex-col justify-end my-auto">
-            <div className="text-2xl font-semibold text-slate-800">$547.10</div>
+            <div className="text-2xl font-semibold text-slate-800">
+              {graphData.price}
+            </div>
             <div className="text-xs font-medium text-green-400">
-              +1.12% (-0.20%)
+              {graphData.change} (Yesterday: {graphData.previousClose})
             </div>
           </div>
         </div>
@@ -28,31 +53,43 @@ export default function Graph() {
             <div className="flex flex-col justify-center whitespace-nowrap">
               <div className="flex gap-0.5">
                 <div className="text-slate-800">Open:</div>
-                <div className="text-slate-500">$546.20</div>
+                <div className="text-slate-500">{graphData.open}</div>
               </div>
             </div>
             <div className="flex flex-col justify-center">
               <div className="flex gap-0.5">
                 <div className="text-slate-800">Previous close:</div>
-                <div className="text-slate-500">$548.22</div>
+                <div className="text-slate-500">{graphData.previousClose}</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <img
-        loading="lazy"
-        src="https://cdn.builder.io/api/v1/image/assets/TEMP/da59c310ca3591c651492f41bb35fa86c381c0e40c28cea18f2c125186f9ad97?apiKey=d50a8ac48a794455921e96e10fadf455&"
-        className="mt-5 w-full aspect-[1.75]"
-      />
-      <div className="flex gap-1 justify-center self-end p-1.5 mt-5 text-xs font-medium text-center bg-white rounded border border-gray-100 border-solid shadow-sm text-slate-800">
-        <img
-          loading="lazy"
-          src="https://cdn.builder.io/api/v1/image/assets/TEMP/10ed1242934f6573c7cc698006bea853421aa7d8f1e3a0e7a066a8de56c90ef7?apiKey=d50a8ac48a794455921e96e10fadf455&"
-          className="shrink-0 my-auto aspect-square w-[11px]"
+      <div className="mt-5 w-full aspect-[1.75]">
+        <Line
+          data={{
+            labels: ["January", "February", "March", "April", "May", "June"],
+            datasets: [
+              {
+                label: "Stock Price",
+                data: [65, 59, 80, 81, 56, 55, 40],
+                fill: false,
+                borderColor: "rgb(75, 192, 192)",
+                tension: 0.1,
+              },
+            ],
+          }}
+          options={{
+            maintainAspectRatio: false,
+          }}
         />
-        <div>Data by Google Finance</div>
       </div>
+      <button
+        className="mt-4 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300"
+        onClick={handleUpdateGraph}
+      >
+        Update Graph
+      </button>
     </div>
   );
 }

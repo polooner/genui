@@ -120,7 +120,7 @@ export default function test() {
       <LayoutBlock />
       <Graph />
       <div className="h-20"></div>
-      <Scoreboard />
+      {/* <Scoreboard /> */}
       <div className="h-20"></div>
       <AccordionBlock items={faqItems} />
       <div className="h-20"></div>
