@@ -20,17 +20,18 @@ import { useRouter } from 'next/navigation';
 import React, { useRef, useState } from 'react';
 import { z } from 'zod';
 
-import { createSchemaAndGenerators } from '@/lib/ai';
-import { MessageRoleType, OpenAIMessageRoleType } from '@/lib/schemas';
+import { makeUISelection, createGenerators } from '@/lib/ai';
+import { MultiComponentTypes, MessageRoleType, OpenAIMessageRoleType } from '@/lib/schemas';
+import { updateState } from '@/lib/stream_handler';
 
 export default function IndexPage() {
-  const [messages, setMessages] = useState<z.infer<typeof StateSchema>>(
+  const [state, setState] = useState<z.infer<typeof StateSchema>>(
     {} as z.infer<typeof StateSchema>
   );
   const [input, setInput] = useState('');
   const [isLoading, setLoading] = useState(false);
 
-  const typedMessages = messages as StateSchema;
+  const typedMessages = state as StateSchema;
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -48,8 +49,8 @@ export default function IndexPage() {
     }
   };
 
-  const updateMessages = (newMessage: any) => {
-    setMessages((prevMessages) => ({
+  const updateMessagesFromUser = (newMessage: any) => {
+    setState((prevMessages) => ({
       ...prevMessages,
       messages: [
         ...prevMessages.messages,
@@ -59,7 +60,7 @@ export default function IndexPage() {
         },
       ],
     }));
-    setMessages((prevMessages) => ({
+    setState((prevMessages) => ({
       ...prevMessages,
       openAIMessages: [
         ...prevMessages.openAIMessages,
@@ -71,17 +72,51 @@ export default function IndexPage() {
     }));
   };
 
-  const startGeneratorTimer = () => {
-    console.log("Dummy startGeneratorTimer function");
+  const updateStateFromCompact = (content: any) => {
+    setState((prevState) => ({
+      ...prevState,
+      openAIMessages: [
+        ...prevState.openAIMessages,
+        { role: OpenAIMessageRoleType.tool, tool_call_id: 'UISelection', content: content },
+      ],
+      messages: [
+        ...prevState.messages,
+        {
+          role: MessageRoleType.ai,
+          content: content,
+          type: MultiComponentTypes.compact,
+        },
+      ],
+    }));
+  };
+
+  const startGeneratorTimer = (generators: ActiveGenerators) => {
+    const intervalId = setInterval(() => {
+      setState((prevState) => {
+        if (prevState.activeGenerators.generators.length === 0) {
+          clearInterval(intervalId);
+          return prevState;
+        }
+        const updatedGenerators = { ...prevState.activeGenerators, generators: generators.generators };
+        const updatedState = updateState(updatedGenerators, state); // Assuming updateState is a function that updates the state with new activeGenerators
+        return updatedState;
+      });
+    }, 100);
   };
 
   const handleSubmit = async () => {
     try {
-      updateMessages(input);
-      const [schema, blockGenerators] = await createSchemaAndGenerators(messages);
-      console.log("Schema:", schema);
-      console.log("Block Generators:", blockGenerators);
-      startGeneratorTimer();
+      updateMessagesFromUser(input);
+
+      const uiSelection = await makeUISelection(state.openAIMessages);
+
+      if (uiSelection.element === MultiComponentTypes.compact) {
+        updateStateFromCompact(uiSelection.content);
+      } else {
+        const generators = await createGenerators(uiSelection, state.openAIMessages);
+        startGeneratorTimer(generators);
+      }
+     
     } catch (error) {
       console.error("Error in handleSubmit:", error);
     } finally {
@@ -91,7 +126,7 @@ export default function IndexPage() {
 
   return (
     <main className='flex flex-col w-full items-center justify-between pb-40 pt-10'>
-      {messages.map((message, index) => {
+      {state.map((message, index) => {
         if (message.role === 'human') {
           return (
             <div

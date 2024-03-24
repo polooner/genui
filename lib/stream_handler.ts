@@ -2,45 +2,61 @@ import { z } from 'zod';
 
 import { ActiveGenerators, SmallBlockSchema, MediumBlockSchema, MultiComponentTypes, StateSchema } from './schemas';
 
-async function updateState(activeGenerators: ActiveGenerators, currentState: StateSchema): any {
+function isGeneratorEmpty(content: { text: string }): boolean {
+    return content.text.length > 20;
+}
+
+
+export async function updateState(activeGenerators: ActiveGenerators, currentState: StateSchema): any {
+    let updatedState = { ...currentState };
     try {
-        let removeGeneratorIds = []
         // Process an iteration of the generators
-        for (let gen_idx = 0; gen_idx < activeGenerators.generators.length; gen_idx++) {
-            const generator = activeGenerators.generators[gen_idx];
-            const imgUrl = generator.imgURL
+        let removeGeneratorIds: list[int] = [];
+        for (const generator of activeGenerators.generators) {
+            const imgUrl: string | undefined = generator.imgURL;
             
             let content = await generator.generate();
 
-            if (finishedTokens(content)) {
-                deleteGenerator(gen_idx, generator);
+            if (isGeneratorEmpty(content)) {
+                removeGeneratorIds.push(generator.blockIdx);
             } else { // Still have content coming in
                 if (activeGenerators.currentComponentType === MultiComponentTypes.compact) {
-                    currentState.messages[gen_idx].content.blocks[gen_idx] = createSmallBlock(content, imgUrl)
-                } else if (schema === MultiComponentTypes.carousal || schema === MultiComponentTypes.focus){
-                    currentState.messages[gen_idx].content.blocks[gen_idx] = createMediumBlock(content, imgUrl)
+                    updatedState.messages[generator.blockIdx].content.blocks[generator.blockIdx] = createSmallBlock(content, imgUrl);
+                } else if (activeGenerators.currentComponentType === MultiComponentTypes.carousal || activeGenerators.currentComponentType === MultiComponentTypes.focus){
+                    updatedState.messages[generator.blockIdx].content.blocks[generator.blockIdx] = createMediumBlock(content, imgUrl);
                 }
             }
         }
+
+        // Remove generators after processing all
+        removeGeneratorIds.forEach((blockIdx: int) => {
+            const generatorToRemove = activeGenerators.generators.find((gen: { blockIdx: int }) => gen.blockIdx === blockIdx);
+            if (generatorToRemove) {
+                deleteGenerator(blockIdx, generatorToRemove);
+                updatedState.activeGenerators.generators = updatedState.activeGenerators.generators.filter((gen: { blockIdx: int }) => gen.blockIdx !== blockIdx);
+            }
+        });
     } catch (error) {
         console.error('Error processing generators:', error);
     }
-    // ADD Set State
+    return updatedState;
+    
+
 }
 
-function deleteGenerator(gen_idx, generatorObject): {
+function deleteGenerator(gen_idx: number, generatorObject: { generators: { blockIdx: number }[] }): void {
     // Delete Generator from list
-    generatorObject.genAvailable.pop()
+    generatorObject.generators = generatorObject.generators.filter(gen => gen.blockIdx !== gen_idx);
 }
 
 function createSmallBlock(content: Object, imgUrl: string): any {
-    let block = SmallBlockSchema.parse({imgUrl: imgUrl, title: content.title, subtitile: content.subtitle, data: content.data})
+    let block = SmallBlockSchema.parse({imgUrl: imgUrl, title: content.title, subtitle: content.subtitle, data: content.data})
 
     return block
 }
 
 function createMediumBlock(content: Object, imgUrl: string): any {
-    let block = MediumBlockSchema.parse({imgUrl: imgUrl, title: content.title, data: content.data})
+    let block = MediumBlockSchema.parse({imgUrl: imgUrl, title: content.title, text: content.text})
 
     return block
 }
