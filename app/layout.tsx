@@ -1,7 +1,5 @@
 import '@/app/globals.css';
-import { Header } from '@/components/header';
 import { Providers } from '@/components/providers';
-import { TailwindIndicator } from '@/components/tailwind-indicator';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 
@@ -37,15 +35,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <Toaster position='top-center' />
         <Providers
           attribute='class'
-          defaultTheme='system'
-          enableSystem
+          defaultTheme='dark'
           disableTransitionOnChange
         >
           <div className='flex flex-col min-h-screen'>
-            <Header />
             <main className='flex flex-col flex-1 bg-muted/50'>{children}</main>
           </div>
-          <TailwindIndicator />
         </Providers>
       </body>
     </html>
