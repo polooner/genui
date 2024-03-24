@@ -39,7 +39,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           disableTransitionOnChange
         >
           <div className='flex flex-col min-h-screen'>
-            <main className='flex flex-col flex-1 bg-muted/50'>{children}</main>
+            <main className='flex flex-col flex-1 bg-black'>{children}</main>
           </div>
         </Providers>
       </body>

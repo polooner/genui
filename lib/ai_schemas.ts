@@ -19,13 +19,15 @@ export const MediumBlockResponse = z.object({
   text: z.string().describe('Body text for the block'),
 }).describe("A medium sized square block. The image takes up the top half and the bottom half is text.");
 
+
 export const MediumBlockQuery = z.object({
   imageSearchQuery: z.string().describe("Google Images search query"),
   shortDescription: z.string().describe("A short description (one sentence) for what the content of the block should be.")
 })
+export type MediumBlockQueryType = z.infer<typeof MediumBlockQuery>;
 
 // Block Lists
-export const Compact = z.object({
+export const CompactQuery = z.object({
   blocks: z.array(SmallBlockResponse)
 })
 .describe(
@@ -42,7 +44,7 @@ export const Compact = z.object({
   "Q) What are the largest companies by employee count?"
   )
 
-export const Carousel = z.object({
+export const CarouselQuery = z.object({
   blocks: z.array(MediumBlockQuery)
 })
 .describe(
@@ -62,7 +64,7 @@ export const Carousel = z.object({
   "Q) Can you outline a 3-day tour plan for Rome?"
   )
 
-export const Focus = z.object({
+export const FocusQuery = z.object({
     blocks: z.array(MediumBlockQuery),
 })
 .describe(
@@ -87,7 +89,7 @@ export const Focus = z.object({
 export const UISelection = z.object({
   chainOfThought: z.string().describe("Think step by step about which UI element would be best for the user's request."),
   element: z.nativeEnum(MultiComponentTypes),
-  content: z.union([Compact, Carousel, Focus])
+  content: z.union([CompactQuery, CarouselQuery, FocusQuery])
 })
 .describe(
   'Your task is to select is to select the appropriate UI element for answering the user question. Rather than simply ' +
@@ -99,3 +101,4 @@ export const UISelection = z.object({
   'given to another AI model in a downstream step to populate all components in parallel. Therefore, the short description ' + 
   'should contain enough information for the AI to know what content it should be writing.'
 )
+export type UISelectionType = z.infer<typeof UISelection>;
