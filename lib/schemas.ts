@@ -1,77 +1,105 @@
-import { z } from "zod";
-
+import { z } from 'zod';
 
 // Component Blocks
 enum BlockTypes {
-  small = "small",
-  medium = "medium"
+  small = 'small',
+  medium = 'medium',
 }
 
-const SmallBlockSchema = z.object({
+export const SmallBlockSchema = z.object({
   imgUrl: z.string().url(),
   title: z.string(),
   subtitle: z.string().optional(),
   data: z.string().optional(),
 });
 
-const MediumBlockSchema = z.object({
+export const MediumBlockSchema = z.object({
   imgUrl: z.string().url(),
   title: z.string(),
   data: z.string().optional(),
-})
+});
+
+export const TextBlockSchema = z.object({
+  text: z.string()
+});
 
 // MultiComponents
 enum MultiComponentTypes {
-  compact = "compact",
-  carousal = "carousal",
-  focus = "focus",
+  compact = 'compact',
+  carousal = 'carousal',
+  focus = 'focus',
+  text = 'text'
 }
 
-const CompactSchema = z.object({
-  blocks: z.array(SmallBlockSchema)
+export const CompactSchema = z.object({
+  blocks: z.array(SmallBlockSchema),
+});
+
+export const CarouselSchema = z.object({
+  blocks: z.array(MediumBlockSchema),
+  scrollPosition: z.number().int(),
+});
+
+export const FocusSchema = z.object({
+  blocks: z.array(MediumBlockSchema),
+  activeBlock: z.number().int(),
+});
+
+// Generator 
+export const GeneratorSchema = z.object({
+  generator: z.any(),
+  blockIdx: z.number().int(),
+  imgURL: z.string().url().optional()
 })
 
-const CarousalSchema = z.object({
-  blocks: z.array(MediumBlockSchema),
-  scrollPosition: z.number().int()
-})
-
-const FocusSchema = z.object({
-  blocks: z.array(MediumBlockSchema),
-  activeBlock: z.number().int()
+export const ActiveGenerators = z.object({
+  generators: z.array(GeneratorSchema),
+  currentComponentType: z.nativeEnum(MultiComponentTypes)
 })
 
 // OpenAI Messages (for AI use only)
 enum OpenAIMessageRoleType {
-  user = "user",
-  assistant = "assistant",
-  tool = "tool"
+  user = 'user',
+  assistant = 'assistant',
+  system = 'system',
+  tool = 'tool'
 }
+
 const OpenAIMessage = z.object({
   role: z.nativeEnum(OpenAIMessageRoleType),
   content: z.string(),
-  tool_call_id: z.string().optional()
-})
+  tool_call_id: z.string().optional(),
+});
 
 // State Messages (for frontend use)
-const Message = z.object({
-  role: z.enum(['human', 'AI']),
-  content: z.union([
-    z.string(), CompactSchema, CarousalSchema, FocusSchema
-  ]),
-  type: z.nativeEnum(MultiComponentTypes)
-})
+enum MessageRoleType {
+  human = 'human',
+  ai = 'AI'
+}
 
+const Message = z.object({
+  role: z.nativeEnum(MessageRoleType),
+  content: z.union([TextBlockSchema, CompactSchema, CarouselSchema, FocusSchema]),
+  type: z.nativeEnum(MultiComponentTypes).optional(),
+});
 
 // State
 const StateSchema = z.object({
   messages: z.array(Message),
-  openAIMessages: z.array(OpenAIMessage)
-})
+  openAIMessages: z.array(OpenAIMessage),
+});
 
 type Message = z.infer<typeof Message>;
 type Messages = z.infer<typeof Message>[];
 type OpenAIMessages = z.infer<typeof OpenAIMessage>[];
 type StateSchema = z.infer<typeof StateSchema>;
 
-export { Message, Messages, OpenAIMessageRoleType, OpenAIMessages, StateSchema, MultiComponentTypes }
+export {
+  MessageRoleType,
+  Message,
+  Messages,
+  MultiComponentTypes,
+  OpenAIMessageRoleType,
+  OpenAIMessages,
+  StateSchema,
+};

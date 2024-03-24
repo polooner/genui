@@ -1,7 +1,8 @@
 import Instructor from '@instructor-ai/instructor';
 import OpenAI from 'openai';
 import { MediumBlockQuery, UISelection } from './ai_schemas';
-import { OpenAIMessageRoleType, OpenAIMessages, MultiComponentTypes } from './schemas';
+import { ActiveGenerators, OpenAIMessageRoleType, OpenAIMessages, MultiComponentTypes } from './schemas';
+import { fetchTopImageUrl } from './utils/query_image';
 
 const GPT4 = 'gpt-4-0125-preview'
 const GPT3dot5 = 'gpt-3.5-turbo-0125'
@@ -58,18 +59,22 @@ ${block.shortDescription}`
 async function createSchemaAndGenerators(messages: OpenAIMessages) {
   const uiSelection = await makeUISelection(messages);
   messages.push(
-    {role: OpenAIMessageRoleType.tool, tool_call_id: 'UISelection', content: uiSelection}
+    {role: OpenAIMessageRoleType.tool, tool_call_id: 'UISelection', content: uiSelection},
+    {role: OpenAIMessageRoleType.system, content: "Now expand the block descriptions into individual blocks."}
   )
 
-  const generators: Promise<any>[] = [];
+  const activeGenerators: ActiveGenerators = [];
+  activeGenerators.currentComponentType = uiSelection.element
   if (uiSelection.element === MultiComponentTypes.carousal || uiSelection.element === MultiComponentTypes.focus) {
-    for (const block of uiSelection.content.blocks) {
+    uiSelection.content.blocks.forEach(async (block, index) => {
       const blockInstructionMessages = createBlockInstructionMessages(messages, block);
-      const generator = createObjectGenerator(blockInstructionMessages);
-      generators.push(generator);
-    }
+      const generator = await createObjectGenerator(blockInstructionMessages);
+      const imgURL = await fetchTopImageUrl(block);
+      activeGenerators.push({generator, blockIdx: index, imgURL});
+    });
   }
-return [uiSelection.element, generators];
+
+return [uiSelection.element, activeGenerators];
 
 }
 // we will have a separates OpenAIMessages list containing the history. It will contain the user's question. then it will 
@@ -87,3 +92,5 @@ const messages = [{role: 'user', content: prompt1}]
 const [schema, blockGenerators] = await createSchemaAndGenerators(messages);
 console.log(schema);
 console.log(blockGenerators)
+
+export { createSchemaAndGenerators }
