@@ -28,7 +28,7 @@ export const TextBlockSchema = z.object({
 // MultiComponents
 enum MultiComponentTypes {
   compact = 'compact',
-  carousal = 'carousal',
+  carousel = 'carousal',
   focus = 'focus',
   text = 'text',
 }

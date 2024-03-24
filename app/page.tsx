@@ -33,8 +33,8 @@ export default function IndexPage() {
     messages: [
       {
         content: { blocks: [{ text: 'random thing' }] },
-        role: 'human',
-        type: 'compact',
+        role: MessageRoleType.human,
+        type: MultiComponentTypes.text,
       },
     ],
     openAIMessages: [
@@ -70,13 +70,15 @@ export default function IndexPage() {
   };
 
   const updateMessagesFromUser = (newMessage: any) => {
+    console.log('State Before updateMessagesFromUser', JSON.stringify(state, null, 2));
     setState((prevState: StateSchemaType) => ({
       ...prevState,
       messages: [
         ...prevState.messages,
         {
           role: MessageRoleType.human,
-          content: newMessage,
+          content: { blocks: [{ text: newMessage }] },
+          type: MultiComponentTypes.text,
         },
       ],
       openAIMessages: [
@@ -90,7 +92,8 @@ export default function IndexPage() {
   };
 
   const updateStateFromCompact = (content: any) => {
-    setState((prevState) => ({
+    console.log('State Before updateStateFromCompact', JSON.stringify(state, null, 2));
+    setState((prevState: StateSchemaType) => ({
       ...prevState,
       openAIMessages: [
         ...prevState.openAIMessages,
@@ -131,7 +134,9 @@ export default function IndexPage() {
   const handleSubmit = async () => {
     try {
       updateMessagesFromUser(input);
+      console.log('State After updateMessagesFromUser (outside of function)', JSON.stringify(state, null, 2));
 
+      console.log("Making UI Selection")
       const uiSelection = await makeUISelection(state.openAIMessages);
       console.log('UI Selection:', uiSelection);
 
@@ -155,7 +160,7 @@ export default function IndexPage() {
   return (
     <main className='flex flex-col w-full items-center justify-between pb-40 pt-10'>
       {state?.messages.map((message, index) => {
-        if (message.role === 'human') {
+        if (message.role === MessageRoleType.human) {
           return (
             <div
               key={index}
@@ -172,8 +177,8 @@ export default function IndexPage() {
               </div>
             </div>
           );
-        } else if (message.role === 'AI') {
-          if (message.type === 'compact') {
+        } else if (message.role === MessageRoleType.ai) {
+          if (message.type === MultiComponentTypes.compact) {
             const compactContent = message.content as z.infer<
               typeof CompactSchema
             >;
@@ -197,7 +202,7 @@ export default function IndexPage() {
                 </div>
               </div>
             );
-          } else if (message.type === 'carousal') {
+          } else if (message.type === MultiComponentTypes.carousel) {
             const carouselContent = message.content as z.infer<
               typeof CarouselSchema
             >;
@@ -224,7 +229,7 @@ export default function IndexPage() {
                 </div>
               </div>
             );
-          } else if (message.type === 'focus') {
+          } else if (message.type === MultiComponentTypes.focus) {
             const focusContent = message.content as z.infer<typeof FocusSchema>;
             const activeBlock = focusContent.blocks[focusContent.activeBlock];
             return (

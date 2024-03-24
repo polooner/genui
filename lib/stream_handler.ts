@@ -38,7 +38,7 @@ export async function updateState(
           ] = createSmallBlock(content, imgUrl);
         } else if (
           activeGenerators.currentComponentType ===
-            MultiComponentTypes.carousal ||
+            MultiComponentTypes.carousel ||
           activeGenerators.currentComponentType === MultiComponentTypes.focus
         ) {
           updatedState.messages[generator.blockIdx].content.blocks[
