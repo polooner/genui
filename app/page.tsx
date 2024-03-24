@@ -172,8 +172,13 @@ export default function IndexPage() {
     currentStateRef.current = state;
   }, [state]);
 
-  const startGeneratorTimer = (activeGenerators: ActiveGeneratorsType) => {
+  const startGeneratorTimer = async (activeGenerators: ActiveGeneratorsType) => {
     console.log("Starting Generators: ", activeGenerators);
+
+    await new Promise(resolve => setTimeout(resolve, 500)); // 0.5 second wait
+    // await new Promise(resolve => setTimeout(resolve, 500)); // 0.5 second wait
+    console.log("Updated state with empty message: ", state)
+
     const intervalId = setInterval(async () => {
       console.log("Interval Running");
       // Use the current state from the ref
@@ -193,7 +198,7 @@ export default function IndexPage() {
         console.error('Error updating state within interval:', error);
         clearInterval(intervalId); // Consider clearing interval on error to prevent endless error loop
       }
-    }, 100);
+    }, 2000);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -218,13 +223,34 @@ export default function IndexPage() {
         // If the UI selection is of type 'compact', update the state accordingly
         newState = await updateStateFromCompact(newState, uiSelection);
       } else {
+        console.log("Creating generators")
         // Otherwise, create generators based on the UI selection
         const generators = await createGenerators(uiSelection, newState.openAIMessages);
         
         // IMPORTANT: Update the state with the new active generators before starting the timer
         newState.activeGenerators = generators; // Set the active generators to the newly created ones
         setState(newState); // Update the state with the new active generators
-
+        console.log("State updated with new active generators")
+        // Insert the initial AI message with undefined properties before starting the timer
+        const initialAIMessage = {
+          role: MessageRoleType.ai,
+          type: newState.activeGenerators.currentComponentType,
+          content: {
+            blocks: newState.activeGenerators.generators.map(() => ({
+              imgUrl: undefined,
+              title: undefined,
+              text: undefined,
+            })),
+          },
+        };
+        
+        // Update the state with the initial AI message
+        setState((prevState) => ({
+          ...prevState,
+          messages: [...prevState.messages, initialAIMessage],
+        }));
+        
+        console.log("Starting Generator Timer")
         // Start the generator timer with the updated state's active generators
         startGeneratorTimer(generators);
       }

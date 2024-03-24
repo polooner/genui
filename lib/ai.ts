@@ -1,6 +1,6 @@
 import Instructor from '@instructor-ai/instructor';
 import OpenAI from 'openai';
-import { MediumBlockQuery, MediumBlockQueryType, UISelection, UISelectionType } from './ai_schemas';
+import { MediumBlockResponse, MediumBlockQueryType, UISelection, UISelectionType } from './ai_schemas';
 import { OpenAIMessageRoleType, OpenAIMessagesType, GeneratorJobType, ActiveGenerators, ActiveGeneratorsType } from './schemas';
 import { fetchTopImageUrl } from './utils/query_image';
 
@@ -23,7 +23,7 @@ async function createObjectGenerator(messages: OpenAIMessagesType): Promise<any>
     messages: messagesCopy,
     model: GPT4,
     response_model: {
-      schema: MediumBlockQuery,
+      schema: MediumBlockResponse,
       name: 'value extraction',
     },
     stream: true,
