@@ -88,3 +88,5 @@ const messages = [{role: 'user', content: prompt1}]
 const [schema, blockGenerators] = await createSchemaAndGenerators(messages);
 console.log(schema);
 console.log(blockGenerators)
+
+export { createSchemaAndGenerators }
