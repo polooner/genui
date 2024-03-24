@@ -2,23 +2,27 @@
 import * as React from "react";
 
 import SmallBlock from "@/components/small-block";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 
 import Focus from "@/components/focus";
 import CarouselBlock from "@/components/carousel-content";
 import MediumBlock from "@/components/medium-block";
 import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
+import { AccordionBlock } from "@/components/accordion-block";
+
+import { useRef, useState } from "react";
+import Image from "next/image";
+import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "../../lib/utils/cn";
+import { DirectionAwareHover } from "@/components/ui/direction-aware-hover";
+import Graph from "@/components/graph";
+import Scoreboard from "@/components/scoreboard";
 
 export default function test() {
+  //   const imageUrl =
+  //     "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg";
   const mediumBlockDetails = {
-    imgUrl: "https://example.com/image.jpg",
+    imgUrl:
+      "https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg?quality=90&resize=556,505",
     title: "Example Title",
     description:
       "This is an example description for the MediumBlock component.",
@@ -41,56 +45,73 @@ export default function test() {
 
   const focusDetails = [
     {
-      imgUrl: "https://example.com/image1.jpg",
+      imgUrl:
+        "https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg?quality=90&resize=556,505",
       title: "Title 1",
       description: "Description for Title 1",
     },
     {
-      imgUrl: "https://example.com/image2.jpg",
+      imgUrl:
+        "https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg?quality=90&resize=556,505",
+      title: "Title 2",
+      description: "Description for Title 2",
+    },
+    {
+      imgUrl:
+        "https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg?quality=90&resize=556,505",
+      title: "Title 2",
+      description: "Description for Title 2",
+    },
+    {
+      imgUrl:
+        "https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg?quality=90&resize=556,505",
+      title: "Title 2",
+      description: "Description for Title 2",
+    },
+    {
+      imgUrl:
+        "https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg?quality=90&resize=556,505",
+      title: "Title 2",
+      description: "Description for Title 2",
+    },
+    {
+      imgUrl:
+        "https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg?quality=90&resize=556,505",
       title: "Title 2",
       description: "Description for Title 2",
     },
     // Add more objects as needed
   ];
 
+  const faqItems = [
+    {
+      value: "item1",
+      question: "What is Lorem Ipsum?",
+      answer:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+    },
+    {
+      value: "item2",
+      question: "Why do we use it?",
+      answer:
+        "It is a long established fact that a reader will be distracted by the readable content.",
+    },
+    // Add more items as needed
+  ];
+
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center mx-auto">
+      <Graph />
+      <div className="h-20"></div>
+      <Scoreboard />
+      <div className="h-20"></div>
+      <AccordionBlock items={faqItems} />
+      <div className="h-20"></div>
       <InfiniteMovingCards
         items={testimonials}
         direction="right"
-        speed="slow"
+        speed="fast"
       />
-      {/* <Carousel className="w-full max-w-sm">
-        <CarouselContent className="-ml-1">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <CarouselItem key={index} className="pl-1 lg:basis-2/3">
-              <div className="p-1">
-                <Card>
-                  <CardContent className="flex flex-col aspect-square items-center">
-                    <img
-                      className="rounded-lg"
-                      src="https://images.immediate.co.uk/production/volatile/sites/30/2020/08/chorizo-mozarella-gnocchi-bake-cropped-9ab73a3.jpg?quality=90&resize=556,505"
-                      alt="Description of the image"
-                    />
-                    <span className="text-xl mt-2 font-semibold">
-                      Step {index + 1}
-                    </span>
-                    <span className="text-xs text-center p-4">
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Deserunt aperiam adipisci, expedita, quos sint aliquid
-                      repudiandae ab rem necessitatibus sunt voluptatum corrupti
-                      officia consequuntur optio dolore harum dolores explicabo
-                      unde?
-                    </span>
-                  </CardContent>
-                </Card>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel> */}
 
       <CarouselBlock cards={cardsData} />
 

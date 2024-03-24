@@ -116,10 +116,10 @@ export default function Focus({ focusDetails }: FocusProps) {
             src={focusDetails[selectedCardIndex].imgUrl}
             alt="Description of the image"
           />
-          <span className="text-2xl mt-2 font-semibold">
+          <span className="text-2xl mt-4 font-semibold">
             {focusDetails[selectedCardIndex].title}
           </span>
-          <div className="text-center p-4 h-64 overflow-y-scroll scrollbar-thin scrollbar-thumb-white scrollbar-track-white">
+          <div className="text-center p-4 h-64 w-full overflow-y-scroll scrollbar-thin scrollbar-thumb-white scrollbar-track-white">
             <span>{focusDetails[selectedCardIndex].description}</span>
           </div>
         </CardContent>
