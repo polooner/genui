@@ -30,12 +30,10 @@ export async function updateState(activeGenerators: ActiveGenerators, currentSta
 
         // Remove generators after processing all
         removeGeneratorIds.forEach((blockIdx: int) => {
-            const generatorToRemove = activeGenerators.generators.find((gen: { blockIdx: int }) => gen.blockIdx === blockIdx);
-            if (generatorToRemove) {
-                deleteGenerator(blockIdx, generatorToRemove);
-                updatedState.activeGenerators.generators = updatedState.activeGenerators.generators.filter((gen: { blockIdx: int }) => gen.blockIdx !== blockIdx);
+            updatedState.activeGenerators.generators = updatedState.activeGenerators.generators.filter((gen: { blockIdx: int }) => gen.blockIdx !== blockIdx);
+            // TODO: ADD MESSAGE TO updatedState.openAIMessages
             }
-        });
+        );
     } catch (error) {
         console.error('Error processing generators:', error);
     }
@@ -44,9 +42,9 @@ export async function updateState(activeGenerators: ActiveGenerators, currentSta
 
 }
 
-function deleteGenerator(gen_idx: number, generatorObject: { generators: { blockIdx: number }[] }): void {
+function deleteGenerator(gen_idx: number, activeGenerators: ActiveGenerators): void {
     // Delete Generator from list
-    generatorObject.generators = generatorObject.generators.filter(gen => gen.blockIdx !== gen_idx);
+    activeGenerators.generators = activeGenerators.generators.filter(gen => gen.blockIdx !== gen_idx);
 }
 
 function createSmallBlock(content: Object, imgUrl: string): any {
