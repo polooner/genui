@@ -17,12 +17,12 @@ import {
 import clsx from 'clsx';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 
 import CarouselBlock, { CardData } from '@/components/carousel-content';
 import SmallBlock from '@/components/small-block';
-import { createGenerators, makeUISelection } from '@/lib/ai';
+import { makeUISelection } from '@/lib/ai';
 import { UISelectionType } from '@/lib/ai_schemas';
 import {
   ActiveGeneratorsType,
@@ -122,13 +122,19 @@ export default function IndexPage() {
       }));
     }
 
-    let tempContent: z.infer<typeof CompactSchema> | z.infer<typeof CarouselSchema> | z.infer<typeof FocusSchema>;
+    let tempContent:
+      | z.infer<typeof CompactSchema>
+      | z.infer<typeof CarouselSchema>
+      | z.infer<typeof FocusSchema>;
     switch (uiSelection.element) {
       case MultiComponentTypes.compact:
         tempContent = CompactSchema.parse({ blocks: tempBlocks });
         break;
       case MultiComponentTypes.carousel:
-        tempContent = CarouselSchema.parse({ blocks: tempBlocks, scrollPosition: 0 });
+        tempContent = CarouselSchema.parse({
+          blocks: tempBlocks,
+          scrollPosition: 0,
+        });
         break;
       case MultiComponentTypes.focus:
         tempContent = FocusSchema.parse({ blocks: tempBlocks, activeBlock: 0 });
@@ -139,42 +145,58 @@ export default function IndexPage() {
     // Temporarily update the state to show the UI without images
     setState((prevState) => ({
       ...prevState,
-      messages: [...prevState.messages, {
-        role: MessageRoleType.ai,
-        content: tempContent,
-        type: uiSelection.element,
-      }],
+      messages: [
+        ...prevState.messages,
+        {
+          role: MessageRoleType.ai,
+          content: tempContent,
+          type: uiSelection.element,
+        },
+      ],
     }));
 
     // Step 2: Load Images (and convert AI Schema into UI Schema)
     let updatedBlocks: SmallBlockSchemaType[] | MediumBlockSchemaType[] = [];
-    let updatedContent: z.infer<typeof CompactSchema> | z.infer<typeof CarouselSchema> | z.infer<typeof FocusSchema>;
+    let updatedContent:
+      | z.infer<typeof CompactSchema>
+      | z.infer<typeof CarouselSchema>
+      | z.infer<typeof FocusSchema>;
 
     if (uiSelection.element === MultiComponentTypes.compact) {
       updatedBlocks = await Promise.all(
-        uiSelection.content.blocks.map(async (block): Promise<SmallBlockSchemaType> => {
-          const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
-          return {
-            imgUrl: imgUrl, // Fetch and set the actual image URL
-            title: block.title,
-            subtitle: block.subtitle,
-            data: block.data,
-          };
-        })
+        uiSelection.content.blocks.map(
+          async (block): Promise<SmallBlockSchemaType> => {
+            const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
+            return {
+              imgUrl: imgUrl, // Fetch and set the actual image URL
+              title: block.title,
+              subtitle: block.subtitle,
+              data: block.data,
+            };
+          }
+        )
       );
       updatedContent = CompactSchema.parse({ blocks: updatedBlocks });
-    } else if (uiSelection.element === MultiComponentTypes.carousel || uiSelection.element === MultiComponentTypes.focus) {
+    } else if (
+      uiSelection.element === MultiComponentTypes.carousel ||
+      uiSelection.element === MultiComponentTypes.focus
+    ) {
       updatedBlocks = await Promise.all(
-        uiSelection.content.blocks.map(async (block): Promise<MediumBlockSchemaType> => {
-          const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
-          return {
-            imgUrl: imgUrl, // Fetch and set the actual image URL
-            title: block.title,
-            text: block.subtitle, // Assuming 'subtitle' in UI schema corresponds to 'text' in MediumBlockSchema
-          };
-        })
+        uiSelection.content.blocks.map(
+          async (block): Promise<MediumBlockSchemaType> => {
+            const imgUrl = await fetchTopImageUrl(block.imageSearchQuery);
+            return {
+              imgUrl: imgUrl, // Fetch and set the actual image URL
+              title: block.title,
+              text: block.subtitle, // Assuming 'subtitle' in UI schema corresponds to 'text' in MediumBlockSchema
+            };
+          }
+        )
       );
-      updatedContent = uiSelection.element === MultiComponentTypes.carousel ? CarouselSchema.parse({ blocks: updatedBlocks, scrollPosition: 0 }) : FocusSchema.parse({ blocks: updatedBlocks, activeBlock: 0 });
+      updatedContent =
+        uiSelection.element === MultiComponentTypes.carousel
+          ? CarouselSchema.parse({ blocks: updatedBlocks, scrollPosition: 0 })
+          : FocusSchema.parse({ blocks: updatedBlocks, activeBlock: 0 });
     } else {
       throw new Error(`Unsupported UI element type: ${uiSelection.element}`);
     }
@@ -211,20 +233,26 @@ export default function IndexPage() {
   }, [state]);
 
   const startGeneratorTimer = (activeGenerators: ActiveGeneratorsType) => {
-    console.log("Starting Generators: ", activeGenerators);
+    console.log('Starting Generators: ', activeGenerators);
     const intervalId = setInterval(async () => {
-      console.log("Interval Running");
+      console.log('Interval Running');
       // Use the current state from the ref
       const currentState = currentStateRef.current;
-      console.log("Current State: ", currentState);
+      console.log('Current State: ', currentState);
       try {
         // if (currentState.activeGenerators.generators.length === 0) {
         //   clearInterval(intervalId);
         //   console.log("No generators left, stopping interval.");
         //   return;
         // }
-        console.log("Updating State with currentState:", currentState);
-        const updatedState = await updateState({ ...currentState.activeGenerators, generators: currentState.activeGenerators.generators }, currentState);
+        console.log('Updating State with currentState:', currentState);
+        const updatedState = await updateState(
+          {
+            ...currentState.activeGenerators,
+            generators: currentState.activeGenerators.generators,
+          },
+          currentState
+        );
         // Update the state with the result
         setState(updatedState);
       } catch (error) {
@@ -256,15 +284,6 @@ export default function IndexPage() {
         // If the UI selection is of type 'compact', update the state accordingly
         newState = await updateStateFromResponse(newState, uiSelection);
       } else {
-        // Otherwise, create generators based on the UI selection
-        const generators = await createGenerators(uiSelection, newState.openAIMessages);
-        
-        // IMPORTANT: Update the state with the new active generators before starting the timer
-        newState.activeGenerators = generators; // Set the active generators to the newly created ones
-        setState(newState); // Update the state with the new active generators
-
-        // Start the generator timer with the updated state's active generators
-        startGeneratorTimer(generators);
       }
     } catch (error) {
       console.error('Error in handleSubmit:', error);
@@ -330,29 +349,7 @@ export default function IndexPage() {
                   'flex w-[70%] max-w-[70%] items-center justify-center border-b border-gray-200 py-6 '
                 )}
               >
-                <div className='flex w-full max-w-screen-md items-start space-x-4'>
-                  <div
-                    className={clsx('p-1.5 text-white', 'bg-green-500')}
-                  ></div>
-
-                  <CarouselBlock cards={carouselContent.blocks as CardData[]} />
-                  {/* {carouselContent.blocks.map((block, blockIndex) => (
-                    <>
-                      <div key={blockIndex} className='space-y-2'>
-                        {block.imgUrl && (
-                          <Image
-                            src={block.imgUrl}
-                            alt={block.title}
-                            width={100}
-                            height={100}
-                          />
-                        )}
-                        <h3 className='text-lg font-semibold'>{block.title}</h3>
-                        {block.text && <p>{block.text}</p>}
-                      </div>
-                    </>
-                  ))} */}
-                </div>
+                <CarouselBlock cards={carouselContent.blocks as CardData[]} />
               </div>
             );
           } else if (message.type === MultiComponentTypes.focus) {
